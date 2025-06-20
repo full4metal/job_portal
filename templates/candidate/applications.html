@@ -1,0 +1,1377 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}My Applications - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .applications-container {
+        padding: 2rem 0;
+    }
+    
+    .applications-header {
+        background-color: #1a1a1a;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .applications-header-content h1 {
+        color: #e5e5e5;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .applications-header-content p {
+        color: #b3b3b3;
+        margin-bottom: 0;
+    }
+    
+    .applications-stats {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #60a5fa;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #b3b3b3;
+    }
+    
+    /* Congratulatory Message Styles */
+    .congratulations-banner {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        position: relative;
+        overflow: hidden;
+        animation: celebrationPulse 2s ease-in-out infinite alternate;
+    }
+    
+    .congratulations-banner::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    .congratulations-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+    
+    .congratulations-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: bounce 2s ease-in-out infinite;
+    }
+    
+    .congratulations-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .congratulations-message {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.95;
+        line-height: 1.6;
+    }
+    
+    .hired-job-details {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .hired-job-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hired-company-name {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+    
+    .celebration-emojis {
+        font-size: 2rem;
+        margin: 1rem 0;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes celebrationPulse {
+        0% { box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3); }
+        100% { box-shadow: 0 12px 35px rgba(16, 185, 129, 0.5); }
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .applications-filters {
+        background-color: #1a1a1a;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+    }
+    
+    .filters-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-group label {
+        font-weight: 500;
+        color: #cccccc;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .filter-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #2a2a2a;
+        color: #e5e5e5;
+    }
+    
+    .filter-control:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    .search-input {
+        position: relative;
+    }
+    
+    .search-input input {
+        padding-left: 2.5rem;
+        width: 100%;
+    }
+    
+    .search-input i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999999;
+    }
+    
+    select.filter-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        padding-right: 2.5rem;
+    }
+    
+    .clear-filters-btn {
+        background: none;
+        border: 1px solid #404040;
+        color: #b3b3b3;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .clear-filters-btn:hover {
+        border-color: #60a5fa;
+        color: #60a5fa;
+        background-color: #2a2a2a;
+    }
+    
+    .applications-results {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        color: #b3b3b3;
+    }
+    
+    .results-count {
+        font-weight: 500;
+    }
+    
+    .sort-dropdown {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .sort-dropdown select {
+        padding: 0.5rem 2rem 0.5rem 0.75rem;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        background-color: #2a2a2a;
+        color: #e5e5e5;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+    }
+    
+    .applications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .application-card {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .application-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        border-color: #404040;
+    }
+    
+    .application-card.status-applied {
+        border-left-color: #60a5fa;
+    }
+    
+    .application-card.status-pending {
+        border-left-color: #fbbf24;
+    }
+    
+    .application-card.status-interview {
+        border-left-color: #4ade80;
+    }
+    
+    .application-card.status-shortlisted {
+        border-left-color: #a78bfa;
+    }
+    
+    .application-card.status-rejected {
+        border-left-color: #f87171;
+    }
+    
+    .application-card.status-hired {
+        border-left-color: #10b981;
+        background: linear-gradient(135deg, #1a1a1a 0%, rgba(16, 185, 129, 0.05) 100%);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .application-card.upcoming-interview {
+        border: 2px solid #fbbf24;
+        background: linear-gradient(135deg, #1a1a1a 0%, rgba(251, 191, 36, 0.05) 100%);
+    }
+    
+    .application-content {
+        padding: 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    
+    .application-main {
+        min-width: 0;
+    }
+    
+    .application-header {
+        margin-bottom: 1rem;
+    }
+    
+    .job-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #e5e5e5;
+        margin-bottom: 0.25rem;
+        text-decoration: none;
+        display: block;
+        transition: all 0.3s ease;
+    }
+    
+    .job-title:hover {
+        color: #60a5fa;
+    }
+    
+    .company-name {
+        font-size: 1rem;
+        color: #60a5fa;
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .application-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+        color: #b3b3b3;
+        font-size: 0.9rem;
+    }
+    
+    .application-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .application-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+    
+    .status-applied {
+        background-color: rgba(96, 165, 250, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+    
+    .status-pending {
+        background-color: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+    
+    .status-interview {
+        background-color: rgba(74, 222, 128, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+    
+    .status-shortlisted {
+        background-color: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+        border: 1px solid rgba(167, 139, 250, 0.3);
+    }
+    
+    .status-rejected {
+        background-color: rgba(248, 113, 113, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+    
+    .status-hired {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        font-weight: 600;
+        animation: hiredGlow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes hiredGlow {
+        0% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.3); }
+        100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
+    }
+    
+    .interview-info {
+        background-color: rgba(251, 191, 36, 0.1);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .interview-info h4 {
+        color: #fbbf24;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .interview-info p {
+        color: #e5e5e5;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    
+    .interview-countdown {
+        background-color: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: auto;
+    }
+    
+    .application-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-end;
+    }
+    
+    .action-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        text-decoration: none;
+        border: none;
+    }
+    
+    .btn-complete {
+        background-color: rgba(74, 222, 128, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+    
+    .btn-complete:hover {
+        background-color: rgba(74, 222, 128, 0.25);
+        border-color: rgba(74, 222, 128, 0.5);
+        transform: translateY(-1px);
+    }
+    
+    .btn-view {
+        background-color: rgba(96, 165, 250, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+    
+    .btn-view:hover {
+        background-color: rgba(96, 165, 250, 0.25);
+        border-color: rgba(96, 165, 250, 0.5);
+    }
+    
+    .btn-celebrate {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        font-weight: 600;
+        animation: celebrateButton 2s ease-in-out infinite alternate;
+    }
+    
+    .btn-celebrate:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    
+    @keyframes celebrateButton {
+        0% { box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); }
+        100% { box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5); }
+    }
+    
+    .empty-state {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #666666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        color: #e5e5e5;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        color: #b3b3b3;
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Modal Styles */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+    
+    .modal-backdrop.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        background-color: #1a1a1a;
+        border: 1px solid #333333;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 500px;
+        margin: 0 1rem;
+        transform: translateY(-20px);
+        transition: transform 0.2s ease;
+    }
+    
+    .modal-backdrop.show .modal-content {
+        transform: translateY(0);
+    }
+    
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #333333;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #e5e5e5;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: #999999;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    
+    .modal-close:hover {
+        background-color: #2a2a2a;
+        color: #cccccc;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+        color: #e5e5e5;
+    }
+    
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #333333;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+    
+    .btn-success {
+        background-color: #4ade80;
+        color: #ffffff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success:hover {
+        background-color: #22c55e;
+    }
+    
+    .btn-secondary {
+        background-color: #374151;
+        color: #e5e5e5;
+        border: 1px solid #404040;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #4b5563;
+        border-color: #60a5fa;
+    }
+    
+    /* Loading States */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 8px;
+        height: 20px;
+        margin-bottom: 0.5rem;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    .application-card.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .filters-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .applications-results {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .application-content {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .application-actions {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .applications-stats {
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            flex: 1;
+        }
+        
+        .congratulations-title {
+            font-size: 2rem;
+        }
+        
+        .congratulations-message {
+            font-size: 1.1rem;
+        }
+        
+        .congratulations-icon {
+            font-size: 3rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .applications-container {
+            padding: 1rem 0;
+        }
+        
+        .applications-header,
+        .applications-filters {
+            padding: 1.5rem;
+        }
+        
+        .application-content {
+            padding: 1.5rem;
+        }
+        
+        .job-title {
+            font-size: 1.1rem;
+        }
+        
+        .application-meta {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        
+        .applications-stats {
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .congratulations-banner {
+            padding: 1.5rem;
+        }
+        
+        .congratulations-title {
+            font-size: 1.75rem;
+        }
+        
+        .congratulations-message {
+            font-size: 1rem;
+        }
+        
+        .hired-job-details {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="applications-container">
+    <div class="container">
+        <div class="applications-header">
+            <div class="applications-header-content">
+                <h1>
+                    <i class="fas fa-file-alt"></i>
+                    My Applications
+                </h1>
+                <p>Track and manage all your job applications</p>
+            </div>
+            
+            <div class="applications-stats">
+                <div class="stat-item">
+                    <div class="stat-number-alt" id="totalApplications">{{ applications|length }}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-number-alt" id="pendingApplications">
+                        {{ applications|selectattr('status', 'equalto', 'interview')|list|length }}
+                    </div>
+                    <div class="stat-label">Interviews</div>
+                </div>
+                
+
+                <div class="stat-item">
+                    <div class="stat-number-alt" id="hiredApplications">
+                        {{ applications|selectattr('status', 'equalto', 'hired')|list|length }}
+                    </div>
+                    <div class="stat-label">Hired</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Congratulatory Banner for Hired Applications -->
+        {% set hired_applications = applications|selectattr('status', 'equalto', 'hired')|list %}
+        {% if hired_applications %}
+            {% for hired_app in hired_applications %}
+                <div class="congratulations-banner">
+                    <div class="congratulations-content">
+                        <div class="congratulations-icon">
+                            🎉
+                        </div>
+                        <h2 class="congratulations-title">
+                            Congratulations!
+                        </h2>
+                        <p class="congratulations-message">
+                            We're thrilled to inform you that you've been successfully hired! 
+                        </p>
+                        <div class="celebration-emojis">
+                            🎊 🥳 🎈 ✨ 🌟
+                        </div>
+                        <div class="hired-job-details">
+                            <div class="hired-job-title">
+                                {{ hired_app.job.title }}
+                            </div>
+                            <div class="hired-company-name">
+                                at {{ hired_app.job.recruiter.company_name }}
+                            </div>
+                            <p style="margin: 0; opacity: 0.9;">
+                                <i class="fas fa-calendar-check"></i>
+                                Hired on {{ hired_app.application_date.strftime('%B %d, %Y') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="applications-filters">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="searchInput">Search Applications</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="filter-control" placeholder="Job title, company name...">
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter" class="filter-control">
+                        <option value="">All Status</option>
+                        <option value="applied">Applied</option>
+                        <option value="interview">Pending (Interview Scheduled)</option>
+                        <option value="shortlisted">Interview Completed</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="hired">Hired</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="dateFilter">Date Range</label>
+                    <select id="dateFilter" class="filter-control">
+                        <option value="">All Time</option>
+                        <option value="week">Last Week</option>
+                        <option value="month">Last Month</option>
+                        <option value="3months">Last 3 Months</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="clear-filters-btn" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="applications-results">
+            <div class="results-count">
+                <span id="resultsCount">{{ applications|length }}</span> applications found
+            </div>
+            <div class="sort-dropdown">
+                <label for="sortBy">Sort by:</label>
+                <select id="sortBy">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="status">Status</option>
+                    <option value="company">Company</option>
+                    <option value="interview">Interview Date</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="applications-list" id="applicationsList">
+            {% if applications %}
+                {% for application in applications %}
+                    {% set is_upcoming_interview = application.interview_date and application.interview_date > now and application.status == 'interview' %}
+                    <div class="application-card status-{{ application.status }} {{ 'upcoming-interview' if is_upcoming_interview }}"
+                         data-status="{{ application.status }}"
+                         data-company="{{ application.job.recruiter.company_name.lower() }}"
+                         data-title="{{ application.job.title.lower() }}"
+                         data-date="{{ application.application_date.strftime('%Y-%m-%d') }}"
+                         data-interview-date="{{ application.interview_date.strftime('%Y-%m-%d %H:%M') if application.interview_date else '' }}">
+                        
+                        <div class="application-content">
+                            <div class="application-main">
+                                <div class="application-header">
+                                    <a href="#" class="job-title" onclick="viewJobDetails({{ application.job.job_id }})">
+                                        {{ application.job.title }}
+                                    </a>
+                                    <div class="company-name">{{ application.job.recruiter.company_name }}</div>
+                                </div>
+                                
+                                <div class="application-meta">
+                                    <div class="application-meta-item">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        Applied {{ application.application_date.strftime('%B %d, %Y') }}
+                                    </div>
+                                    <div class="application-meta-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ application.job.location }}
+                                    </div>
+                                    {% if application.job.salary_range %}
+                                        <div class="application-meta-item">
+                                            <i class="fas fa-rupee-sign"></i>
+                                            {{ application.job.salary_range }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="application-status status-{{ application.status }}">
+                                    <i class="fas fa-{{ 'clock' if application.status == 'applied' else 'calendar-check' if application.status == 'interview' else 'check-circle' if application.status == 'shortlisted' else 'times-circle' if application.status == 'rejected' else 'trophy' }}"></i>
+                                    {% if application.status == 'applied' %}
+                                        Applied
+                                    {% elif application.status == 'interview' %}
+                                        Pending (Interview Scheduled)
+                                    {% elif application.status == 'shortlisted' %}
+                                        Interview Completed
+                                    {% elif application.status == 'rejected' %}
+                                        Rejected
+                                    {% elif application.status == 'hired' %}
+                                        🎉 HIRED! 🎉
+                                    {% else %}
+                                        {{ application.status.title() }}
+                                    {% endif %}
+                                </div>
+                                
+                                {% if application.interview_date and application.status == 'interview' %}
+                                    <div class="interview-info">
+                                        <h4>
+                                            <i class="fas fa-calendar-alt"></i>
+                                            Interview Scheduled
+                                            {% if is_upcoming_interview %}
+                                                <span class="interview-countdown" id="countdown-{{ application.application_id }}">
+                                                    <!-- Countdown will be populated by JavaScript -->
+                                                </span>
+                                            {% endif %}
+                                        </h4>
+                                        <p>
+                                            <strong>Date & Time:</strong> 
+                                            {{ application.interview_date.strftime('%A, %B %d, %Y at %I:%M %p') }}
+                                        </p>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if application.rejection_reason %}
+                                    <div class="interview-info" style="background-color: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.3);">
+                                        <h4 style="color: #f87171;">
+                                            <i class="fas fa-info-circle"></i>
+                                            Rejection Reason
+                                        </h4>
+                                        <p>{{ application.rejection_reason }}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="application-actions">
+                                {% if application.status == 'interview' and application.interview_date %}
+                                    <button class="action-btn btn-complete" 
+                                            onclick="markInterviewComplete({{ application.application_id }}, '{{ application.job.title }}')">
+                                        <i class="fas fa-check-circle"></i>
+                                        Mark Interview Complete
+                                    </button>
+                                {% elif application.status == 'hired' %}
+                                    <button class="action-btn btn-celebrate" disabled>
+                                        <i class="fas fa-trophy"></i>
+                                        Congratulations!
+                                    </button>
+                                {% endif %}
+                                
+                                <a href="#" class="action-btn btn-view" onclick="viewApplicationDetails({{ application.application_id }})">
+                                    <i class="fas fa-eye"></i>
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>No Applications Yet</h3>
+                    <p>You haven't applied to any jobs yet. Start browsing available positions and submit your applications.</p>
+                    <a href="{{ url_for('candidate.jobs') }}" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Browse Jobs
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Mark Interview Complete Modal -->
+<div class="modal-backdrop" id="completeInterviewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-check-circle"></i>
+                Mark Interview Complete
+            </h4>
+            <button type="button" class="modal-close" onclick="closeModal('completeInterviewModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to mark the interview for <strong id="completeJobTitle"></strong> as complete?</p>
+            <p>This will update your application status to "Interview Completed" and notify the recruiter that you've attended the interview.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('completeInterviewModal')">
+                Cancel
+            </button>
+            <form id="completeInterviewForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="application_id" id="completeApplicationId">
+                <button type="submit" class="btn-success">
+                    <i class="fas fa-check-circle"></i> Mark Complete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initFilters();
+    initSorting();
+    initCountdowns();
+    
+    // Auto-refresh every 30 seconds for real-time updates
+    setInterval(updateCountdowns, 30000);
+});
+
+// Initialize filters
+function initFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    
+    [searchInput, statusFilter, dateFilter].forEach(element => {
+        if (element) {
+            element.addEventListener('input', filterApplications);
+            element.addEventListener('change', filterApplications);
+        }
+    });
+}
+
+// Initialize sorting
+function initSorting() {
+    const sortBy = document.getElementById('sortBy');
+    if (sortBy) {
+        sortBy.addEventListener('change', sortApplications);
+    }
+}
+
+// Filter applications
+function filterApplications() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    
+    const applicationCards = document.querySelectorAll('.application-card');
+    let visibleCount = 0;
+    
+    applicationCards.forEach(card => {
+        const title = card.getAttribute('data-title');
+        const company = card.getAttribute('data-company');
+        const status = card.getAttribute('data-status');
+        const date = new Date(card.getAttribute('data-date'));
+        
+        const matchesSearch = !searchTerm || 
+            title.includes(searchTerm) || 
+            company.includes(searchTerm);
+        
+        const matchesStatus = !statusFilter || status === statusFilter;
+        
+        let matchesDate = true;
+        if (dateFilter) {
+            const now = new Date();
+            const daysDiff = (now - date) / (1000 * 60 * 60 * 24);
+            
+            switch (dateFilter) {
+                case 'week':
+                    matchesDate = daysDiff <= 7;
+                    break;
+                case 'month':
+                    matchesDate = daysDiff <= 30;
+                    break;
+                case '3months':
+                    matchesDate = daysDiff <= 90;
+                    break;
+            }
+        }
+        
+        if (matchesSearch && matchesStatus && matchesDate) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Update results count
+    document.getElementById('resultsCount').textContent = visibleCount;
+    
+    // Show/hide empty state
+    const applicationsList = document.getElementById('applicationsList');
+    const emptyState = applicationsList.querySelector('.empty-state');
+    
+    if (visibleCount === 0 && !emptyState) {
+        const noResultsElement = document.createElement('div');
+        noResultsElement.className = 'empty-state';
+        noResultsElement.innerHTML = `
+            <div class="empty-state-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>No Applications Found</h3>
+            <p>No applications match your current search criteria. Try adjusting your filters.</p>
+            <button class="btn btn-primary" onclick="clearAllFilters()">
+                <i class="fas fa-redo"></i> Clear All Filters
+            </button>
+        `;
+        applicationsList.appendChild(noResultsElement);
+    } else if (visibleCount > 0 && emptyState) {
+        emptyState.remove();
+    }
+}
+
+// Sort applications
+function sortApplications() {
+    const sortBy = document.getElementById('sortBy').value;
+    const applicationsList = document.getElementById('applicationsList');
+    const applicationCards = Array.from(applicationsList.querySelectorAll('.application-card'));
+    
+    applicationCards.sort((a, b) => {
+        switch (sortBy) {
+            case 'newest':
+                return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+            case 'oldest':
+                return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+            case 'status':
+                return a.getAttribute('data-status').localeCompare(b.getAttribute('data-status'));
+            case 'company':
+                return a.getAttribute('data-company').localeCompare(b.getAttribute('data-company'));
+            case 'interview':
+                const aInterview = a.getAttribute('data-interview-date');
+                const bInterview = b.getAttribute('data-interview-date');
+                if (!aInterview && !bInterview) return 0;
+                if (!aInterview) return 1;
+                if (!bInterview) return -1;
+                return new Date(aInterview) - new Date(bInterview);
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted cards
+    applicationCards.forEach(card => applicationsList.appendChild(card));
+}
+
+// Clear all filters
+function clearAllFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('dateFilter').value = '';
+    
+    filterApplications();
+}
+
+// Initialize countdowns for upcoming interviews
+function initCountdowns() {
+    updateCountdowns();
+}
+
+// Update countdown timers
+function updateCountdowns() {
+    const countdownElements = document.querySelectorAll('[id^="countdown-"]');
+    
+    countdownElements.forEach(element => {
+        const applicationId = element.id.split('-')[1];
+        const card = document.querySelector(`[data-interview-date]`);
+        
+        if (card) {
+            const interviewDate = new Date(card.getAttribute('data-interview-date'));
+            const now = new Date();
+            const timeDiff = interviewDate - now;
+            
+            if (timeDiff > 0) {
+                const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                if (days > 0) {
+                    element.textContent = `${days}d ${hours}h`;
+                } else if (hours > 0) {
+                    element.textContent = `${hours}h ${minutes}m`;
+                } else {
+                    element.textContent = `${minutes}m`;
+                }
+            } else {
+                element.textContent = 'Now';
+                element.style.backgroundColor = 'rgba(248, 113, 113, 0.2)';
+                element.style.color = '#f87171';
+            }
+        }
+    });
+}
+
+// Mark interview as complete
+function markInterviewComplete(applicationId, jobTitle) {
+    const modal = document.getElementById('completeInterviewModal');
+    const titleElement = document.getElementById('completeJobTitle');
+    const applicationIdInput = document.getElementById('completeApplicationId');
+    const form = document.getElementById('completeInterviewForm');
+    
+    titleElement.textContent = jobTitle;
+    applicationIdInput.value = applicationId;
+    form.action = "{{ url_for('candidate.mark_interview_complete') }}";
+    
+    modal.classList.add('show');
+}
+
+// View application details (placeholder)
+function viewApplicationDetails(applicationId) {
+    console.log('View application details for application ID:', applicationId);
+    // This would open a detailed application view modal or navigate to a detail page
+}
+
+// View job details (placeholder)
+function viewJobDetails(jobId) {
+    console.log('View job details for job ID:', jobId);
+    // This would open a detailed job view modal or navigate to a job detail page
+}
+
+// Close modal
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modals = document.querySelectorAll('.modal-backdrop');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal-backdrop.show');
+        openModals.forEach(modal => {
+            modal.classList.remove('show');
+        });
+    }
+});
+
+// Real-time status updates (simulated)
+function simulateRealTimeUpdates() {
+    // This would typically connect to a WebSocket or use Server-Sent Events
+    // For now, we'll just refresh the page periodically
+    setInterval(() => {
+        // Check for status updates via AJAX
+        // updateApplicationStatuses();
+    }, 60000); // Check every minute
+}
+
+// Auto-save filter preferences
+function saveFilterPreferences() {
+    const preferences = {
+        search: document.getElementById('searchInput').value,
+        status: document.getElementById('statusFilter').value,
+        date: document.getElementById('dateFilter').value,
+        sort: document.getElementById('sortBy').value
+    };
+    
+    localStorage.setItem('applicationFilterPreferences', JSON.stringify(preferences));
+}
+
+// Load filter preferences
+function loadFilterPreferences() {
+    const saved = localStorage.getItem('applicationFilterPreferences');
+    if (saved) {
+        const preferences = JSON.parse(saved);
+        
+        document.getElementById('searchInput').value = preferences.search || '';
+        document.getElementById('statusFilter').value = preferences.status || '';
+        document.getElementById('dateFilter').value = preferences.date || '';
+        document.getElementById('sortBy').value = preferences.sort || 'newest';
+        
+        filterApplications();
+        sortApplications();
+    }
+}
+
+// Load preferences on page load
+loadFilterPreferences();
+
+// Save preferences when filters change
+document.addEventListener('change', saveFilterPreferences);
+document.addEventListener('input', debounce(saveFilterPreferences, 500));
+
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Initialize real-time updates
+simulateRealTimeUpdates();
+</script>
+{% endblock %}

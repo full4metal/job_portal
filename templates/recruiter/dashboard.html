@@ -1,0 +1,118 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Recruiter Dashboard - Job Management Portal{% endblock %}
+
+{% block content %}
+<section class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-header-section">
+            <h1>Welcome back, {{ recruiter.company_name }}!</h1>
+            <p>Manage your job postings and find the best candidates</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_jobs }}</div>
+                <div class="stat-label">Total Jobs Posted</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.active_jobs }}</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.pending_jobs }}</div>
+                <div class="stat-label">Pending Approval</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_applications }}</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="main-content">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Job Postings</h3>
+                        <a href="{{ url_for('recruiter.jobs') }}" class="card-action">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_jobs %}
+                            {% for job in recent_jobs %}
+                            <div class="job-item">
+                                <div class="item-title">{{ job.title }}</div>
+                                <div class="item-meta">
+                                    <span>Posted {{ job.posted_date.strftime('%B %d, %Y') }}</span>
+                                    <span class="status-badge status-{{ job.status }}">
+                                        {% if job.is_approved %}
+                                            {{ job.status.title() }}
+                                        {% else %}
+                                            Pending
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-briefcase" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                                <p>No jobs posted yet. <a href="{{ url_for('recruiter.create_job') }}">Post your first job</a>!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Applications</h3>
+                        <a href="{{ url_for('recruiter.applications') }}" class="card-action">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_applications %}
+                            {% for application in recent_applications %}
+                            <div class="application-item">
+                                <div class="item-title">{{ application.candidate.first_name }} {{ application.candidate.last_name }}</div>
+                                <div style="color: var(--gray-600); margin-bottom: 0.25rem;">Applied for: {{ application.job.title }}</div>
+                                <div class="item-meta">
+                                    <span>{{ application.application_date.strftime('%B %d, %Y') }}</span>
+                                    <span class="status-badge status-{{ application.status }}">{{ application.status.title() }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-users" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                                <p>No applications received yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <a href="{{ url_for('recruiter.create_job') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Post New Job
+                            </a>
+                            <a href="{{ url_for('recruiter.candidates') }}" class="btn btn-outline">
+                                <i class="fas fa-search"></i> Search Candidates
+                            </a>
+                            <a href="{{ url_for('recruiter.applications') }}" class="btn btn-outline">
+                                <i class="fas fa-users"></i> View Applications
+                            </a>
+                            <a href="{{ url_for('recruiter.profile') }}" class="btn btn-outline">
+                                <i class="fas fa-building"></i> Update Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

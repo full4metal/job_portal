@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        padding: 80px 0;
+        background-color: var(--light-color);
+        min-height: calc(100vh - 80px);
+        margin-top: 80px;
+    }
+    
+    .login-form-container {
+        max-width: 450px;
+        margin: 0 auto;
+        background-color: var(--white);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .login-header h1 {
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .login-header p {
+        color: var(--gray-600);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .error-message {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-check input {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .form-check label {
+        margin-bottom: 0;
+    }
+    
+    .form-footer {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .form-footer p {
+        margin-top: 1rem;
+    }
+    
+    .form-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .form-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .flash-messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .flash-message {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 0.5rem;
+    }
+    
+    .flash-message.success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .flash-message.error {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .flash-message.info {
+        background-color: rgba(37, 99, 235, 0.1);
+        color: var(--primary-color);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+    
+    .general-error {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+       .debug-info {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        font-family: monospace;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="login-container">
+    <div class="container">
+        <div class="login-form-container">
+            <div class="login-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to your account to continue</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% if errors and errors.general %}
+                <div class="general-error">{{ errors.general }}</div>
+            {% endif %}
+            
+            <form method="POST" action="{{ url_for('main.login') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ request.form.email if request.form.email }}" required>
+                    {% if errors and errors.email %}
+                        <div class="error-message">{{ errors.email }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    {% if errors and errors.password %}
+                        <div class="error-message">{{ errors.password }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" id="remember" name="remember" {{ 'checked' if request.form.remember }}>
+                    <label for="remember">Remember me</label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+                
+                <div class="form-footer">
+                    <a href="#forgot-password">Forgot your password?</a>
+                    <p>Don't have an account? <a href="{{ url_for('main.register') }}">Register here</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

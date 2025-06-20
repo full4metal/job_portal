@@ -1,0 +1,1611 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Manage Applications - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style > 
+.applications-container {
+  padding: 2rem 0;
+}
+
+.applications-header {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.applications-header-content h1 {
+  color: #e5e5e5;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.applications-header-content p {
+  color: #b3b3b3;
+  margin-bottom: 0;
+}
+
+.applications-filters {
+  background-color: #1a1a1a;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #cccccc;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.filter-control {
+  padding: 0.75rem 1rem;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background-color: #2a2a2a;
+  color: #e5e5e5;
+}
+
+.filter-control:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.search-input {
+  position: relative;
+}
+
+.search-input input {
+  padding-left: 2.5rem;
+  width: 100%;
+}
+
+.search-input i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999999;
+}
+
+select.filter-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+
+.clear-filters-btn {
+  background: none;
+  border: 1px solid #404040;
+  color: #b3b3b3;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clear-filters-btn:hover {
+  border-color: #60a5fa;
+  color: #60a5fa;
+  background-color: #2a2a2a;
+}
+
+.applications-results {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  color: #b3b3b3;
+}
+
+.results-count {
+  font-weight: 500;
+}
+
+.sort-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-dropdown select {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  color: #e5e5e5;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+}
+
+.applications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.application-card {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.application-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  border-color: #404040;
+}
+
+.application-card.status-applied {
+  border-left-color: #60a5fa;
+}
+
+.application-card.status-interview {
+  border-left-color: #4ade80;
+}
+
+.application-card.status-shortlisted {
+  border-left-color: #a78bfa;
+}
+
+.application-card.status-rejected {
+  border-left-color: #f87171;
+}
+
+.application-card.status-hired {
+  border-left-color: #10b981;
+}
+
+.application-content {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.application-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #60a5fa;
+  font-weight: 600;
+  border: 2px solid #404040;
+}
+
+.application-details {
+  min-width: 0;
+}
+
+.candidate-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e5e5e5;
+  margin-bottom: 0.25rem;
+}
+
+.job-title {
+  font-size: 1rem;
+  color: #60a5fa;
+  margin-bottom: 0.5rem;
+}
+
+.application-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #b3b3b3;
+  font-size: 0.9rem;
+}
+
+.application-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.interview-date-info {
+  background-color: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.candidate-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.candidate-skill {
+  background-color: #2a2a2a;
+  color: #cccccc;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #404040;
+}
+
+.application-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-applied {
+  background-color: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.status-interview {
+  background-color: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.status-shortlisted {
+  background-color: rgba(167, 139, 250, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.status-rejected {
+  background-color: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.status-hired {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.application-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-interview {
+  background-color: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.btn-interview:hover {
+  background-color: rgba(74, 222, 128, 0.25);
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+.btn-reject {
+  background-color: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.btn-reject:hover {
+  background-color: rgba(248, 113, 113, 0.25);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+.btn-hire {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-hire:hover {
+  background-color: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-view {
+  background-color: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.btn-view:hover {
+  background-color: rgba(96, 165, 250, 0.25);
+  border-color: rgba(96, 165, 250, 0.5);
+}
+
+.empty-state {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: #666666;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+  color: #e5e5e5;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: #b3b3b3;
+  margin-bottom: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 3rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #404040;
+  background-color: #2a2a2a;
+  color: #cccccc;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+  border-color: #60a5fa;
+  color: #60a5fa;
+  background-color: #1a1a1a;
+}
+
+.pagination-btn.active {
+  background-color: #60a5fa;
+  color: #ffffff;
+  border-color: #60a5fa;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background-color: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 500px;
+  margin: 0 1rem;
+  transform: translateY(-20px);
+  transition: transform 0.2s ease;
+}
+
+.modal-backdrop.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #333333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e5e5e5;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #999999;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background-color: #2a2a2a;
+  color: #cccccc;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  color: #e5e5e5;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #333333;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-danger {
+  background-color: #f87171;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background-color: #ef4444;
+}
+
+.btn-success {
+  background-color: #4ade80;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+  background-color: #22c55e;
+}
+
+.btn-hire-confirm {
+  background-color: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-hire-confirm:hover {
+  background-color: #059669;
+}
+
+.btn-secondary {
+  background-color: #374151;
+  color: #e5e5e5;
+  border: 1px solid #404040;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #4b5563;
+  border-color: #60a5fa;
+}
+
+/* Interview Date Input Styles */
+.interview-date-group {
+  margin-top: 1.5rem;
+}
+
+.interview-date-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #cccccc;
+}
+
+.interview-date-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #2a2a2a;
+  color: #e5e5e5;
+}
+
+.interview-date-input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.interview-date-input.error {
+  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
+}
+
+.date-error {
+  color: #f87171;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.date-help {
+  color: #999999;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Rejection Reason Input */
+.rejection-reason-group {
+  margin-top: 1.5rem;
+}
+
+.rejection-reason-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #cccccc;
+}
+
+.rejection-reason-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #2a2a2a;
+  color: #e5e5e5;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.rejection-reason-input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+/* Candidate Profile Modal */
+.candidate-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-header {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #2a2a2a;
+  border: 2px solid #404040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.profile-info h3 {
+  margin-bottom: 0.25rem;
+  color: #e5e5e5;
+}
+
+.profile-info p {
+  color: #b3b3b3;
+  margin-bottom: 0.5rem;
+}
+
+.profile-section {
+  margin-bottom: 1.5rem;
+}
+
+.profile-section h4 {
+  font-size: 1.1rem;
+  color: #e5e5e5;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #333333;
+}
+
+.profile-section p {
+  color: #cccccc;
+  line-height: 1.6;
+}
+
+.profile-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Loading States */
+.application-card.updating {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.application-card.updating::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filters-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .applications-results {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .application-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .application-avatar {
+    margin: 0 auto;
+  }
+
+  .application-meta {
+    justify-content: center;
+  }
+
+  .candidate-skills {
+    justify-content: center;
+  }
+
+  .application-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .applications-container {
+    padding: 1rem 0;
+  }
+
+  .applications-header,
+  .applications-filters {
+    padding: 1.5rem;
+  }
+
+  .application-content {
+    padding: 1.5rem;
+  }
+
+  .candidate-name {
+    font-size: 1.1rem;
+  }
+
+  .application-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="applications-container">
+    <div class="container">
+        <div class="applications-header">
+            <div class="applications-header-content">
+                <h1>
+                    <i class="fas fa-users"></i>
+                    Manage Applications
+                </h1>
+                <p>Review and manage job applications from candidates</p>
+            </div>
+        </div>
+        
+        <div class="applications-filters">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="searchInput">Search Applications</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="filter-control" placeholder="Candidate name, job title...">
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter" class="filter-control">
+                        <option value="">All Status</option>
+                        <option value="applied">Applied</option>
+                        <option value="interview">Interview Scheduled</option>
+                        <option value="shortlisted">Shortlisted</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="hired">Hired</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="jobFilter">Job</label>
+                    <select id="jobFilter" class="filter-control">
+                        <option value="">All Jobs</option>
+                        {% for job in jobs %}
+                            <option value="{{ job.job_id }}">{{ job.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="clear-filters-btn" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="applications-results">
+            <div class="results-count">
+                <span id="resultsCount">{{ applications|length }}</span> applications found
+            </div>
+            <div class="sort-dropdown">
+                <label for="sortBy">Sort by:</label>
+                <select id="sortBy">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="status">Status</option>
+                    <option value="candidate">Candidate Name</option>
+                    <option value="job">Job Title</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="applications-list" id="applicationsList">
+            {% if applications %}
+                {% for application in applications %}
+                    <div class="application-card status-{{ application.status }}"
+                         data-status="{{ application.status }}"
+                         data-candidate="{{ application.candidate.first_name }} {{ application.candidate.last_name }}"
+                         data-job="{{ application.job.title }}"
+                         data-job-id="{{ application.job.job_id }}"
+                         data-date="{{ application.application_date.strftime('%Y-%m-%d') }}"
+                         id="application-{{ application.application_id }}">
+                        
+                        <div class="application-content">
+                            <div class="application-avatar">
+                                {{ application.candidate.first_name[0] }}{{ application.candidate.last_name[0] }}
+                            </div>
+                            
+                            <div class="application-details">
+                                <div class="candidate-name">
+                                    {{ application.candidate.first_name }} {{ application.candidate.last_name }}
+                                </div>
+                                <div class="job-title">Applied for: {{ application.job.title }}</div>
+                                
+                                <div class="application-meta">
+                                    <div class="application-meta-item">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        Applied {{ application.application_date.strftime('%B %d, %Y') }}
+                                    </div>
+                                    <div class="application-meta-item">
+                                        <i class="fas fa-envelope"></i>
+                                        {{ application.candidate.user.email }}
+                                    </div>
+                                    {% if application.candidate.years_experience %}
+                                        <div class="application-meta-item">
+                                            <i class="fas fa-briefcase"></i>
+                                            {{ application.candidate.years_experience }} years experience
+                                        </div>
+                                    {% endif %}
+                                    {% if application.interview_date %}
+                                        <div class="interview-date-info">
+                                            <i class="fas fa-calendar-check"></i>
+                                            Interview: {{ application.interview_date.strftime('%b %d, %Y at %I:%M %p') }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="application-status status-{{ application.status }}">
+                                    <i class="fas fa-{{ 'clock' if application.status == 'applied' else 'calendar-check' if application.status == 'interview' else 'star' if application.status == 'shortlisted' else 'times-circle' if application.status == 'rejected' else 'trophy' }}"></i>
+                                    {{ application.status.title() }}
+                                </div>
+                                
+                                {% if application.candidate.candidate_skills %}
+                                    <div class="candidate-skills">
+                                        {% for skill in application.candidate.candidate_skills.split(',')[:5] %}
+                                            <span class="candidate-skill">{{ skill.strip() }}</span>
+                                        {% endfor %}
+                                        {% if application.candidate.candidate_skills.split(',')|length > 5 %}
+                                            <span class="candidate-skill">+{{ application.candidate.candidate_skills.split(',')|length - 5 }} more</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="application-actions">
+                                {% if application.status == 'applied' %}
+                                    <button class="action-btn btn-interview" 
+                                            onclick="scheduleInterview({{ application.application_id }}, '{{ application.candidate.first_name }} {{ application.candidate.last_name }}')">
+                                        <i class="fas fa-calendar-plus"></i>
+                                        Schedule Interview
+                                    </button>
+                                    <button class="action-btn btn-reject" 
+                                            onclick="rejectApplication({{ application.application_id }}, '{{ application.candidate.first_name }} {{ application.candidate.last_name }}')">
+                                        <i class="fas fa-times"></i>
+                                        Reject
+                                    </button>
+                                {% elif application.status == 'interview' %}
+                                    <button class="action-btn btn-reject" 
+                                            onclick="rejectApplication({{ application.application_id }}, '{{ application.candidate.first_name }} {{ application.candidate.last_name }}')">
+                                        <i class="fas fa-times"></i>
+                                        Reject
+                                    </button>
+                                {% elif application.status == 'shortlisted' %}
+                                    <button class="action-btn btn-hire" 
+                                            onclick="hireCandidate({{ application.application_id }}, '{{ application.candidate.first_name }} {{ application.candidate.last_name }}', '{{ application.job.title }}')">
+                                        <i class="fas fa-trophy"></i>
+                                        Hire Candidate
+                                    </button>
+                                    <button class="action-btn btn-reject" 
+                                            onclick="rejectApplication({{ application.application_id }}, '{{ application.candidate.first_name }} {{ application.candidate.last_name }}')">
+                                        <i class="fas fa-times"></i>
+                                        Reject
+                                    </button>
+                                {% endif %}
+                                
+                                <button class="action-btn btn-view" 
+                                        onclick="viewCandidateProfile({{ application.application_id }})">
+                                    <i class="fas fa-user"></i>
+                                    View Profile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>No Applications Yet</h3>
+                    <p>You haven't received any applications yet. Make sure your job postings are active and visible to candidates.</p>
+                    <a href="{{ url_for('recruiter.create_job') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Post a New Job
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Schedule Interview Modal -->
+<div class="modal-backdrop" id="interviewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-calendar-plus"></i>
+                Schedule Interview
+            </h4>
+            <button type="button" class="modal-close" onclick="closeModal('interviewModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Schedule an interview with <strong id="interviewCandidateName"></strong>.</p>
+            
+            <div class="interview-date-group">
+                <label for="interviewDateTime">Interview Date & Time</label>
+                <input type="datetime-local" id="interviewDateTime" class="interview-date-input" required>
+                <div class="date-help">Select a date and time for the interview</div>
+                <div class="date-error" id="dateError" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="dateErrorText"></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('interviewModal')">
+                Cancel
+            </button>
+            <form id="interviewForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="application_id" id="interviewApplicationId">
+                <input type="hidden" name="status" value="interview">
+                <input type="hidden" name="interview_date" id="interviewDateHidden">
+                <button type="submit" class="btn-success">
+                    <i class="fas fa-calendar-check"></i> Schedule Interview
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Application Modal -->
+<div class="modal-backdrop" id="rejectModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-times-circle"></i>
+                Reject Application
+            </h4>
+            <button type="button" class="modal-close" onclick="closeModal('rejectModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to reject the application from <strong id="rejectCandidateName"></strong>?</p>
+            
+            <div class="rejection-reason-group">
+                <label for="rejectionReason">Reason for Rejection (Optional)</label>
+                <textarea id="rejectionReason" class="rejection-reason-input" 
+                          placeholder="Provide feedback to help the candidate improve..."></textarea>
+                <div class="date-help">This feedback will be shared with the candidate</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('rejectModal')">
+                Cancel
+            </button>
+            <form id="rejectForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="application_id" id="rejectApplicationId">
+                <input type="hidden" name="status" value="rejected">
+                <input type="hidden" name="reason" id="rejectionReasonHidden">
+                <button type="submit" class="btn-danger">
+                    <i class="fas fa-times"></i> Reject Application
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Hire Candidate Modal -->
+<div class="modal-backdrop" id="hireModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-trophy"></i>
+                Hire Candidate
+            </h4>
+            <button type="button" class="modal-close" onclick="closeModal('hireModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>🎉 Congratulations! You're about to hire <strong id="hireCandidateName"></strong> for the position of <strong id="hireJobTitle"></strong>.</p>
+            <p>This action will:</p>
+            <ul style="color: #b3b3b3; margin: 1rem 0; padding-left: 1.5rem;">
+                <li>Update the application status to "Hired"</li>
+                <li>Notify the candidate of their successful application</li>
+                <li>Mark this position as filled (if configured)</li>
+            </ul>
+            <p><strong>Are you sure you want to proceed?</strong></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('hireModal')">
+                Cancel
+            </button>
+            <form id="hireForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="application_id" id="hireApplicationId">
+                <input type="hidden" name="status" value="hired">
+                <button type="submit" class="btn-hire-confirm">
+                    <i class="fas fa-trophy"></i> Hire Candidate
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Candidate Profile Modal -->
+<div class="modal-backdrop" id="profileModal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-user"></i>
+                Candidate Profile
+            </h4>
+            <button type="button" class="modal-close" onclick="closeModal('profileModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="candidate-profile" id="candidateProfileContent">
+                <!-- Profile content will be loaded here -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal('profileModal')">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initFilters();
+    initSorting();
+    initFormValidation();
+});
+
+// Initialize filters
+function initFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const jobFilter = document.getElementById('jobFilter');
+    
+    [searchInput, statusFilter, jobFilter].forEach(element => {
+        if (element) {
+            element.addEventListener('input', filterApplications);
+            element.addEventListener('change', filterApplications);
+        }
+    });
+}
+
+// Initialize sorting
+function initSorting() {
+    const sortBy = document.getElementById('sortBy');
+    if (sortBy) {
+        sortBy.addEventListener('change', sortApplications);
+    }
+}
+
+// Filter applications
+function filterApplications() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const jobFilter = document.getElementById('jobFilter').value;
+    
+    const applicationCards = document.querySelectorAll('.application-card');
+    let visibleCount = 0;
+    
+    applicationCards.forEach(card => {
+        const candidate = card.getAttribute('data-candidate').toLowerCase();
+        const job = card.getAttribute('data-job').toLowerCase();
+        const status = card.getAttribute('data-status');
+        const jobId = card.getAttribute('data-job-id');
+        
+        const matchesSearch = !searchTerm || 
+            candidate.includes(searchTerm) || 
+            job.includes(searchTerm);
+        
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesJob = !jobFilter || jobId === jobFilter;
+        
+        if (matchesSearch && matchesStatus && matchesJob) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Update results count
+    document.getElementById('resultsCount').textContent = visibleCount;
+    
+    // Show/hide empty state
+    const applicationsList = document.getElementById('applicationsList');
+    const emptyState = applicationsList.querySelector('.empty-state');
+    
+    if (visibleCount === 0 && !emptyState) {
+        const noResultsElement = document.createElement('div');
+        noResultsElement.className = 'empty-state';
+        noResultsElement.innerHTML = `
+            <div class="empty-state-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>No Applications Found</h3>
+            <p>No applications match your current search criteria. Try adjusting your filters.</p>
+            <button class="btn btn-primary" onclick="clearAllFilters()">
+                <i class="fas fa-redo"></i> Clear All Filters
+            </button>
+        `;
+        applicationsList.appendChild(noResultsElement);
+    } else if (visibleCount > 0 && emptyState) {
+        emptyState.remove();
+    }
+}
+
+// Sort applications
+function sortApplications() {
+    const sortBy = document.getElementById('sortBy').value;
+    const applicationsList = document.getElementById('applicationsList');
+    const applicationCards = Array.from(applicationsList.querySelectorAll('.application-card'));
+    
+    applicationCards.sort((a, b) => {
+        switch (sortBy) {
+            case 'newest':
+                return new Date(b.getAttribute('data-date')) - new Date(a.getAttribute('data-date'));
+            case 'oldest':
+                return new Date(a.getAttribute('data-date')) - new Date(b.getAttribute('data-date'));
+            case 'status':
+                return a.getAttribute('data-status').localeCompare(b.getAttribute('data-status'));
+            case 'candidate':
+                return a.getAttribute('data-candidate').localeCompare(b.getAttribute('data-candidate'));
+            case 'job':
+                return a.getAttribute('data-job').localeCompare(b.getAttribute('data-job'));
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted cards
+    applicationCards.forEach(card => applicationsList.appendChild(card));
+}
+
+// Clear all filters
+function clearAllFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('jobFilter').value = '';
+    
+    filterApplications();
+}
+
+// Schedule Interview
+function scheduleInterview(applicationId, candidateName) {
+    const modal = document.getElementById('interviewModal');
+    const candidateNameElement = document.getElementById('interviewCandidateName');
+    const applicationIdInput = document.getElementById('interviewApplicationId');
+    const form = document.getElementById('interviewForm');
+    
+    candidateNameElement.textContent = candidateName;
+    applicationIdInput.value = applicationId;
+    form.action = "{{ url_for('recruiter.update_application_status') }}";
+    
+    // Set minimum date to current date/time
+    const now = new Date();
+    const minDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    document.getElementById('interviewDateTime').min = minDateTime;
+    
+    modal.classList.add('show');
+}
+
+// Reject Application
+function rejectApplication(applicationId, candidateName) {
+    const modal = document.getElementById('rejectModal');
+    const candidateNameElement = document.getElementById('rejectCandidateName');
+    const applicationIdInput = document.getElementById('rejectApplicationId');
+    const form = document.getElementById('rejectForm');
+    
+    candidateNameElement.textContent = candidateName;
+    applicationIdInput.value = applicationId;
+    form.action = "{{ url_for('recruiter.update_application_status') }}";
+    
+    modal.classList.add('show');
+}
+
+// Hire Candidate
+function hireCandidate(applicationId, candidateName, jobTitle) {
+    const modal = document.getElementById('hireModal');
+    const candidateNameElement = document.getElementById('hireCandidateName');
+    const jobTitleElement = document.getElementById('hireJobTitle');
+    const applicationIdInput = document.getElementById('hireApplicationId');
+    const form = document.getElementById('hireForm');
+    
+    candidateNameElement.textContent = candidateName;
+    jobTitleElement.textContent = jobTitle;
+    applicationIdInput.value = applicationId;
+    form.action = "{{ url_for('recruiter.update_application_status') }}";
+    
+    modal.classList.add('show');
+}
+
+// View Candidate Profile
+async function viewCandidateProfile(applicationId) {
+    const modal = document.getElementById('profileModal');
+    const profileContent = document.getElementById('candidateProfileContent');
+    
+    // Show loading state
+    profileContent.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #60a5fa;"></i>
+            <p style="margin-top: 1rem; color: #b3b3b3;">Loading candidate profile...</p>
+        </div>
+    `;
+    
+    modal.classList.add('show');
+    
+    try {
+        const response = await fetch("{{ url_for('recruiter.get_candidate_profile') }}?application_id=" + applicationId);
+        const data = await response.json();
+        
+        if (data.success) {
+            const candidate = data.candidate;
+            const application = data.application;
+            const job = data.job;
+            
+            profileContent.innerHTML = `
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        ${candidate.first_name[0]}${candidate.last_name[0]}
+                    </div>
+                    <div class="profile-info">
+                        <h3>${candidate.first_name} ${candidate.last_name}</h3>
+                        <p><i class="fas fa-envelope"></i> ${candidate.email}</p>
+                        ${candidate.phone ? `<p><i class="fas fa-phone"></i> ${candidate.phone}</p>` : ''}
+                        ${candidate.location ? `<p><i class="fas fa-map-marker-alt"></i> ${candidate.location}</p>` : ''}
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h4>Professional Information</h4>
+                    <p><strong>Experience:</strong> ${candidate.years_experience || 0} years</p>
+                    ${candidate.candidate_skills ? `
+                        <p><strong>Skills:</strong></p>
+                        <div class="profile-skills">
+                            ${candidate.candidate_skills.split(',').map(skill => 
+                                `<span class="candidate-skill">${skill.trim()}</span>`
+                            ).join('')}
+                        </div>
+                    ` : '<p><strong>Skills:</strong> Not specified</p>'}
+                </div>
+                
+                <div class="profile-section">
+                    <h4>Application Details</h4>
+                    <p><strong>Applied for:</strong> ${job.title}</p>
+                    <p><strong>Application Date:</strong> ${new Date(application.application_date).toLocaleDateString()}</p>
+                    <p><strong>Status:</strong> <span class="application-status status-${application.status}">${application.status}</span></p>
+                    ${application.interview_date ? `<p><strong>Interview Date:</strong> ${new Date(application.interview_date).toLocaleString()}</p>` : ''}
+                    ${application.match_score ? `<p><strong>Match Score:</strong> ${application.match_score}%</p>` : ''}
+                </div>
+            `;
+        } else {
+            profileContent.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f87171;"></i>
+                    <p style="margin-top: 1rem; color: #f87171;">Failed to load candidate profile</p>
+                    <p style="color: #b3b3b3;">${data.error}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading candidate profile:', error);
+        profileContent.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #f87171;"></i>
+                <p style="margin-top: 1rem; color: #f87171;">Error loading candidate profile</p>
+                <p style="color: #b3b3b3;">Please try again later</p>
+            </div>
+        `;
+    }
+}
+
+// Form validation
+function initFormValidation() {
+    // Interview form validation
+    const interviewForm = document.getElementById('interviewForm');
+    if (interviewForm) {
+        interviewForm.addEventListener('submit', function(e) {
+            const dateTimeInput = document.getElementById('interviewDateTime');
+            const dateHidden = document.getElementById('interviewDateHidden');
+            const dateError = document.getElementById('dateError');
+            const dateErrorText = document.getElementById('dateErrorText');
+            
+            if (!dateTimeInput.value) {
+                e.preventDefault();
+                dateTimeInput.classList.add('error');
+                dateError.style.display = 'flex';
+                dateErrorText.textContent = 'Please select an interview date and time';
+                return;
+            }
+            
+            const selectedDate = new Date(dateTimeInput.value);
+            const now = new Date();
+            
+            if (selectedDate <= now) {
+                e.preventDefault();
+                dateTimeInput.classList.add('error');
+                dateError.style.display = 'flex';
+                dateErrorText.textContent = 'Interview date must be in the future';
+                return;
+            }
+            
+            // Clear errors and set hidden field
+            dateTimeInput.classList.remove('error');
+            dateError.style.display = 'none';
+            dateHidden.value = dateTimeInput.value;
+        });
+        
+        // Clear error on input change
+        document.getElementById('interviewDateTime').addEventListener('input', function() {
+            this.classList.remove('error');
+            document.getElementById('dateError').style.display = 'none';
+        });
+    }
+    
+    // Reject form validation
+    const rejectForm = document.getElementById('rejectForm');
+    if (rejectForm) {
+        rejectForm.addEventListener('submit', function(e) {
+            const reasonTextarea = document.getElementById('rejectionReason');
+            const reasonHidden = document.getElementById('rejectionReasonHidden');
+            
+            reasonHidden.value = reasonTextarea.value.trim();
+        });
+    }
+}
+
+// Close modal
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        
+        // Clear form data when closing
+        if (modalId === 'interviewModal') {
+            document.getElementById('interviewDateTime').value = '';
+            document.getElementById('interviewDateTime').classList.remove('error');
+            document.getElementById('dateError').style.display = 'none';
+        } else if (modalId === 'rejectModal') {
+            document.getElementById('rejectionReason').value = '';
+        }
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modals = document.querySelectorAll('.modal-backdrop');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal-backdrop.show');
+        openModals.forEach(modal => {
+            modal.classList.remove('show');
+        });
+    }
+});
+
+// Update application status in real-time
+function updateApplicationStatus(applicationId, newStatus) {
+    const applicationCard = document.getElementById(`application-${applicationId}`);
+    if (applicationCard) {
+        // Add updating class
+        applicationCard.classList.add('updating');
+        
+        // Update status after a short delay to show the loading state
+        setTimeout(() => {
+            applicationCard.classList.remove('updating');
+            applicationCard.setAttribute('data-status', newStatus);
+            applicationCard.className = `application-card status-${newStatus}`;
+            
+            // Update status badge
+            const statusBadge = applicationCard.querySelector('.application-status');
+            if (statusBadge) {
+                statusBadge.className = `application-status status-${newStatus}`;
+                statusBadge.innerHTML = `
+                    <i class="fas fa-${getStatusIcon(newStatus)}"></i>
+                    ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}
+                `;
+            }
+            
+            // Update action buttons
+            updateActionButtons(applicationCard, newStatus);
+        }, 500);
+    }
+}
+
+// Get status icon
+function getStatusIcon(status) {
+    const icons = {
+        'applied': 'clock',
+        'interview': 'calendar-check',
+        'shortlisted': 'star',
+        'rejected': 'times-circle',
+        'hired': 'trophy'
+    };
+    return icons[status] || 'circle';
+}
+
+// Update action buttons based on status
+function updateActionButtons(applicationCard, status) {
+    const actionsContainer = applicationCard.querySelector('.application-actions');
+    const applicationId = applicationCard.id.split('-')[1];
+    const candidateName = applicationCard.getAttribute('data-candidate');
+    const jobTitle = applicationCard.getAttribute('data-job');
+    
+    let buttonsHTML = '';
+    
+    if (status === 'applied') {
+        buttonsHTML = `
+            <button class="action-btn btn-interview" onclick="scheduleInterview(${applicationId}, '${candidateName}')">
+                <i class="fas fa-calendar-plus"></i> Schedule Interview
+            </button>
+            <button class="action-btn btn-reject" onclick="rejectApplication(${applicationId}, '${candidateName}')">
+                <i class="fas fa-times"></i> Reject
+            </button>
+        `;
+    } else if (status === 'interview') {
+        buttonsHTML = `
+            <button class="action-btn btn-reject" onclick="rejectApplication(${applicationId}, '${candidateName}')">
+                <i class="fas fa-times"></i> Reject
+            </button>
+        `;
+    } else if (status === 'shortlisted') {
+        buttonsHTML = `
+            <button class="action-btn btn-hire" onclick="hireCandidate(${applicationId}, '${candidateName}', '${jobTitle}')">
+                <i class="fas fa-trophy"></i> Hire Candidate
+            </button>
+            <button class="action-btn btn-reject" onclick="rejectApplication(${applicationId}, '${candidateName}')">
+                <i class="fas fa-times"></i> Reject
+            </button>
+        `;
+    }
+    
+    // Always add view profile button
+    buttonsHTML += `
+        <button class="action-btn btn-view" onclick="viewCandidateProfile(${applicationId})">
+            <i class="fas fa-user"></i> View Profile
+        </button>
+    `;
+    
+    actionsContainer.innerHTML = buttonsHTML;
+}
+
+// Handle form submissions with real-time updates
+document.addEventListener('submit', function(e) {
+    if (e.target.matches('#interviewForm, #rejectForm, #hireForm')) {
+        const applicationId = e.target.querySelector('input[name="application_id"]').value;
+        const status = e.target.querySelector('input[name="status"]').value;
+        
+        // Close modal immediately
+        const modal = e.target.closest('.modal-backdrop');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        
+        // Update UI optimistically
+        updateApplicationStatus(applicationId, status);
+    }
+});
+</script>
+{% endblock %}

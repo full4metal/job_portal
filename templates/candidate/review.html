@@ -1,0 +1,1187 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Company Reviews - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .review-container {
+        padding: 2rem 0;
+    }
+    
+    .review-header {
+        background-color: #1a1a1a;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+    }
+    
+    .review-header h1 {
+        color: #e5e5e5;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .review-header p {
+        color: #b3b3b3;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+    
+    .review-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #333333;
+    }
+    
+    .review-tab {
+        padding: 1rem 1.5rem;
+        background: none;
+        border: none;
+        color: #b3b3b3;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .review-tab.active {
+        color: #60a5fa;
+        border-bottom-color: #60a5fa;
+    }
+    
+    .review-tab:hover {
+        color: #60a5fa;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    /* Review Form Styles */
+    .review-form-card {
+        background-color: #1a1a1a;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #cccccc;
+        font-size: 0.95rem;
+    }
+    
+    .required {
+        color: #f87171;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #2a2a2a;
+        color: #e5e5e5;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    .form-control.error {
+        border-color: #f87171;
+        box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .error-message {
+        color: #f87171;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .form-help {
+        font-size: 0.875rem;
+        color: #999999;
+        margin-top: 0.25rem;
+    }
+    
+    /* Star Rating System */
+    .star-rating {
+        display: flex;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .star-rating input {
+        display: none;
+    }
+    
+    .star-rating label {
+        font-size: 2rem;
+        color: #404040;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 0;
+    }
+    
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #fbbf24;
+    }
+    
+    .star-rating input:checked ~ label {
+        color: #fbbf24;
+    }
+    
+    /* Reverse the order for proper hover effect */
+    .star-rating {
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: #fbbf24;
+    }
+    
+    /* Sentiment Analysis */
+    .sentiment-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+    
+    .sentiment-positive {
+        background-color: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .sentiment-negative {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .sentiment-neutral {
+        background-color: rgba(156, 163, 175, 0.15);
+        color: #9ca3af;
+        border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+    
+    .character-count {
+        text-align: right;
+        font-size: 0.8rem;
+        color: #999999;
+        margin-top: 0.25rem;
+    }
+    
+    .character-count.warning {
+        color: #fbbf24;
+    }
+    
+    .character-count.error {
+        color: #f87171;
+    }
+    
+    /* Company Statistics */
+    .company-stats {
+        background-color: #1a1a1a;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background-color: #2a2a2a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #404040;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #60a5fa;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-label {
+        color: #b3b3b3;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    
+    .rating-stars {
+        color: #fbbf24;
+        font-size: 1.2rem;
+    }
+    
+    .rating-number {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #e5e5e5;
+    }
+    
+    /* Review Cards */
+    .reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .review-card {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        border-color: #404040;
+    }
+    
+    .review-header-card {
+        padding: 1.5rem;
+        border-bottom: 1px solid #333333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .review-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .reviewer-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .reviewer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .reviewer-name {
+        font-weight: 500;
+        color: #e5e5e5;
+    }
+    
+    .review-date {
+        color: #999999;
+        font-size: 0.9rem;
+    }
+    
+    .review-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .review-stars {
+        color: #fbbf24;
+    }
+    
+    .review-body {
+        padding: 1.5rem;
+    }
+    
+    .review-text {
+        color: #cccccc;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .review-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* Company List */
+    .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .company-card {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .company-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        border-color: #404040;
+    }
+    
+    .company-card-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #333333;
+    }
+    
+    .company-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #e5e5e5;
+        margin-bottom: 0.5rem;
+    }
+    
+    .company-description {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .company-card-body {
+        padding: 1.5rem;
+    }
+    
+    .company-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .company-stats-mini {
+        color: #999999;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .company-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn-outline {
+        background: none;
+        border: 1px solid #60a5fa;
+        color: #60a5fa;
+    }
+    
+    .btn-outline:hover {
+        background-color: #60a5fa;
+        color: #ffffff;
+    }
+    
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination-btn {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #404040;
+        background-color: #2a2a2a;
+        color: #b3b3b3;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination-btn:hover {
+        border-color: #60a5fa;
+        color: #60a5fa;
+        background-color: #1a1a1a;
+    }
+    
+    .pagination-btn.active {
+        background-color: #60a5fa;
+        color: #ffffff;
+        border-color: #60a5fa;
+    }
+    
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #666666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        color: #e5e5e5;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        color: #b3b3b3;
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Flash Messages */
+    .flash-messages {
+        margin-bottom: 2rem;
+    }
+    
+    .flash-message {
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .flash-message.success {
+        background-color: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .flash-message.error {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .flash-message.info {
+        background-color: rgba(96, 165, 250, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .review-container {
+            padding: 1rem 0;
+        }
+        
+        .review-header,
+        .review-form-card,
+        .company-stats {
+            padding: 1.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .companies-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .review-tabs {
+            flex-wrap: wrap;
+        }
+        
+        .review-tab {
+            padding: 0.75rem 1rem;
+        }
+        
+        .star-rating label {
+            font-size: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .review-header-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .company-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="review-container">
+    <div class="container">
+        <div class="review-header">
+            <h1>
+                <i class="fas fa-star"></i>
+                Company Reviews
+            </h1>
+            <p>Share your experience and help others make informed decisions</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'error' else 'info-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Tab Navigation -->
+        <div class="review-tabs">
+            <button class="review-tab active" onclick="showTab('submit-review')">
+                <i class="fas fa-edit"></i> Submit Review
+            </button>
+            <button class="review-tab" onclick="showTab('browse-companies')">
+                <i class="fas fa-building"></i> Browse Companies
+            </button>
+            {% if recruiter %}
+                <button class="review-tab" onclick="showTab('company-reviews')">
+                    <i class="fas fa-comments"></i> {{ recruiter.company_name }} Reviews
+                </button>
+            {% endif %}
+        </div>
+        
+        <!-- Submit Review Tab -->
+        <div id="submit-review" class="tab-content active">
+            <div class="review-form-card">
+                <h3 style="color: #e5e5e5; margin-bottom: 1.5rem;">
+                    <i class="fas fa-star"></i> Submit a Company Review
+                </h3>
+                
+                <form method="POST" action="{{ url_for('sentiment.submit_review') }}" id="reviewForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="form-group">
+                        <label for="recruiter_id">Company <span class="required">*</span></label>
+                        <select class="form-control {{ 'error' if errors and errors.recruiter_id }}" 
+                                id="recruiter_id" name="recruiter_id" required>
+                            <option value="">Select a company to review</option>
+                            {% if companies %}
+                                {% for company in companies %}
+                                    <option value="{{ company.recruiter_id }}" 
+                                            {{ 'selected' if form_data and form_data.recruiter_id == company.recruiter_id|string }}>
+                                        {{ company.company_name }}
+                                    </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        {% if errors and errors.recruiter_id %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.recruiter_id }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rating">Rating <span class="required">*</span></label>
+                        <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5" 
+                                   {{ 'checked' if form_data and form_data.rating == '5' }}>
+                            <label for="star5">★</label>
+                            <input type="radio" id="star4" name="rating" value="4"
+                                   {{ 'checked' if form_data and form_data.rating == '4' }}>
+                            <label for="star4">★</label>
+                            <input type="radio" id="star3" name="rating" value="3"
+                                   {{ 'checked' if form_data and form_data.rating == '3' }}>
+                            <label for="star3">★</label>
+                            <input type="radio" id="star2" name="rating" value="2"
+                                   {{ 'checked' if form_data and form_data.rating == '2' }}>
+                            <label for="star2">★</label>
+                            <input type="radio" id="star1" name="rating" value="1"
+                                   {{ 'checked' if form_data and form_data.rating == '1' }}>
+                            <label for="star1">★</label>
+                        </div>
+                        {% if errors and errors.rating %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.rating }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">Click on the stars to rate your experience</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="review_text">Detailed Review <span class="required">*</span></label>
+                        <textarea class="form-control {{ 'error' if errors and errors.review_text }}" 
+                                  id="review_text" name="review_text" 
+                                  placeholder="Share your experience with this company. What was good? What could be improved? Be specific and helpful to other job seekers..."
+                                  maxlength="2000" required>{{ form_data.review_text if form_data and form_data.review_text }}</textarea>
+                        
+                        <div class="character-count" id="charCount">
+                            <span id="charCurrent">{{ form_data.review_text|length if form_data and form_data.review_text else 0 }}</span>/2000 characters
+                        </div>
+                        
+                        {% if errors and errors.review_text %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.review_text }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="form-help">Minimum 50 characters required. Be honest and constructive.</div>
+                        
+                        <!-- Real-time sentiment indicator -->
+                        <div id="sentimentIndicator" class="sentiment-indicator" style="display: none;">
+                            <i class="fas fa-smile"></i>
+                            <span id="sentimentText">Analyzing sentiment...</span>
+                        </div>
+                    </div>
+                    
+                    {% if errors and errors.general %}
+                        <div class="error-message" style="margin-bottom: 1rem;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ errors.general }}
+                        </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Browse Companies Tab -->
+        <div id="browse-companies" class="tab-content">
+            {% if company_stats %}
+                <div class="companies-grid">
+                    {% for company_stat in company_stats %}
+                        <div class="company-card">
+                            <div class="company-card-header">
+                                <h3 class="company-name">{{ company_stat.company.company_name }}</h3>
+                                {% if company_stat.company.company_description %}
+                                    <p class="company-description">{{ company_stat.company.company_description }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="company-card-body">
+                                <div class="company-rating">
+                                    {% if company_stat.average_rating > 0 %}
+                                        <div class="rating-display">
+                                            <span class="rating-number">{{ company_stat.average_rating }}</span>
+                                            <div class="rating-stars">
+                                                {% for i in range(1, 6) %}
+                                                    {% if i <= company_stat.average_rating %}
+                                                        ★
+                                                    {% else %}
+                                                        ☆
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span style="color: #999999;">No ratings yet</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="company-stats-mini">
+                                    <i class="fas fa-comments"></i>
+                                    {{ company_stat.total_reviews }} review{{ 's' if company_stat.total_reviews != 1 else '' }}
+                                </div>
+                                
+                                <div class="company-actions">
+                                    <a href="{{ url_for('sentiment.view_reviews', recruiter_id=company_stat.company.recruiter_id) }}" 
+                                       class="btn btn-outline">
+                                        <i class="fas fa-eye"></i> View Reviews
+                                    </a>
+                                    <button class="btn btn-primary" 
+                                            onclick="selectCompanyForReview({{ company_stat.company.recruiter_id }}, '{{ company_stat.company.company_name }}')">
+                                        <i class="fas fa-star"></i> Write Review
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3>No Companies Available</h3>
+                    <p>There are currently no companies to review. Check back later.</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Company Reviews Tab -->
+        {% if recruiter %}
+            <div id="company-reviews" class="tab-content">
+                <!-- Company Statistics -->
+                {% if stats %}
+                    <div class="company-stats">
+                        <h3 style="color: #e5e5e5; margin-bottom: 1.5rem;">
+                            <i class="fas fa-chart-bar"></i> {{ recruiter.company_name }} - Review Statistics
+                        </h3>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number-alt">{{ stats.total_reviews }}</span>
+                                <div class="stat-label">Total Reviews</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="rating-display">
+                                    <span class="rating-number">{{ stats.average_rating }}</span>
+                                    
+                                    <div class="rating-stars">
+                                        {% for i in range(1, 6) %}
+                                            {% if i <= stats.average_rating %}
+                                                ★
+                                            {% else %}
+                                                ☆
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="stat-label">Average Rating</div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number-alt" style="color: #4ade80;">{{ stats.positive_reviews }}</span>
+                                <div class="stat-label">Positive Reviews</div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number-alt" style="color: #f87171;">{{ stats.negative_reviews }}</span>
+                                <div class="stat-label">Negative Reviews</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Reviews List -->
+                {% if reviews %}
+                    <div class="reviews-list">
+                        {% for review in reviews %}
+                            <div class="review-card">
+                                <div class="review-header-card">
+                                    <div class="review-meta">
+                                        <div class="reviewer-info">
+                                            <div class="reviewer-avatar">
+                                                {{ review.candidate.first_name[0] }}{{ review.candidate.last_name[0] }}
+                                            </div>
+                                            <div>
+                                                <div class="reviewer-name">
+                                                    {{ review.candidate.first_name }} {{ review.candidate.last_name }}
+                                                </div>
+                                                <div class="review-date">
+                                                    {{ review.review_date.strftime('%B %d, %Y') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="review-rating">
+                                        <div class="review-stars">
+                                            {% for i in range(1, 6) %}
+                                                {% if i <= review.rating %}
+                                                    ★
+                                                {% else %}
+                                                    ☆
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <span style="color: #e5e5e5; font-weight: 500;">{{ review.rating }}/5</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="review-body">
+                                    <div class="review-text">{{ review.review_text }}</div>
+                                    
+                                    <div class="review-footer">
+                                        <div class="sentiment-indicator sentiment-{{ get_sentiment_label(review.sentiment_score) }}">
+                                            <i class="fas fa-{{ 'smile' if review.sentiment_score > 0.1 else 'frown' if review.sentiment_score < -0.1 else 'meh' }}"></i>
+                                            {{ get_sentiment_label(review.sentiment_score).title() }} Sentiment
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if pagination.pages > 1 %}
+                        <div class="pagination">
+                            {% if pagination.has_prev %}
+                                <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id, page=pagination.prev_num) }}" 
+                                   class="pagination-btn">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            {% endif %}
+                            
+                            {% for page_num in pagination.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != pagination.page %}
+                                        <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id, page=page_num) }}" 
+                                           class="pagination-btn">{{ page_num }}</a>
+                                    {% else %}
+                                        <span class="pagination-btn active">{{ page_num }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="pagination-btn">…</span>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if pagination.has_next %}
+                                <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id, page=pagination.next_num) }}" 
+                                   class="pagination-btn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>No Reviews Yet</h3>
+                        <p>{{ recruiter.company_name }} hasn't received any reviews yet. Be the first to share your experience!</p>
+                        <button class="btn btn-primary" onclick="showTab('submit-review')">
+                            <i class="fas fa-star"></i> Write First Review
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initCharacterCount();
+    initSentimentAnalysis();
+    initFormValidation();
+});
+
+// Tab functionality
+function showTab(tabName) {
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // Remove active class from all tabs
+    const tabs = document.querySelectorAll('.review-tab');
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    const selectedContent = document.getElementById(tabName);
+    if (selectedContent) {
+        selectedContent.classList.add('active');
+    }
+    
+    // Add active class to clicked tab
+    event.target.classList.add('active');
+}
+
+// Character count functionality
+function initCharacterCount() {
+    const textarea = document.getElementById('review_text');
+    const charCurrent = document.getElementById('charCurrent');
+    const charCount = document.getElementById('charCount');
+    
+    if (textarea && charCurrent) {
+        textarea.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            charCurrent.textContent = currentLength;
+            
+            // Update styling based on character count
+            charCount.classList.remove('warning', 'error');
+            
+            if (currentLength < 50) {
+                charCount.classList.add('error');
+            } else if (currentLength > 1800) {
+                charCount.classList.add('warning');
+            }
+        });
+    }
+}
+
+// Real-time sentiment analysis
+function initSentimentAnalysis() {
+    const textarea = document.getElementById('review_text');
+    const sentimentIndicator = document.getElementById('sentimentIndicator');
+    const sentimentText = document.getElementById('sentimentText');
+    
+    if (textarea && sentimentIndicator) {
+        let sentimentTimeout;
+        
+        textarea.addEventListener('input', function() {
+            const text = this.value.trim();
+            
+            if (text.length < 10) {
+                sentimentIndicator.style.display = 'none';
+                return;
+            }
+            
+            // Clear previous timeout
+            clearTimeout(sentimentTimeout);
+            
+            // Show loading state
+            sentimentIndicator.style.display = 'flex';
+            sentimentIndicator.className = 'sentiment-indicator';
+            sentimentText.textContent = 'Analyzing sentiment...';
+            
+            // Debounce sentiment analysis
+            sentimentTimeout = setTimeout(() => {
+                analyzeSentiment(text);
+            }, 1000);
+        });
+    }
+}
+
+// Analyze sentiment via API
+async function analyzeSentiment(text) {
+    try {
+        const response = await fetch("{{ url_for('sentiment.api_sentiment_analysis') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ text: text })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            updateSentimentDisplay(data.sentiment_label, data.sentiment_score);
+        } else {
+            hideSentimentIndicator();
+        }
+    } catch (error) {
+        console.error('Sentiment analysis error:', error);
+        hideSentimentIndicator();
+    }
+}
+
+// Update sentiment display
+function updateSentimentDisplay(label, score) {
+    const sentimentIndicator = document.getElementById('sentimentIndicator');
+    const sentimentText = document.getElementById('sentimentText');
+    
+    if (sentimentIndicator && sentimentText) {
+        sentimentIndicator.className = `sentiment-indicator sentiment-${label}`;
+        
+        let icon = 'fa-meh';
+        let text = 'Neutral sentiment detected';
+        
+        if (label === 'positive') {
+            icon = 'fa-smile';
+            text = 'Positive sentiment detected';
+        } else if (label === 'negative') {
+            icon = 'fa-frown';
+            text = 'Negative sentiment detected';
+        }
+        
+        sentimentIndicator.innerHTML = `
+            <i class="fas ${icon}"></i>
+            <span>${text} (${score >= 0 ? '+' : ''}${score})</span>
+        `;
+    }
+}
+
+// Hide sentiment indicator
+function hideSentimentIndicator() {
+    const sentimentIndicator = document.getElementById('sentimentIndicator');
+    if (sentimentIndicator) {
+        sentimentIndicator.style.display = 'none';
+    }
+}
+
+// Form validation
+function initFormValidation() {
+    const form = document.getElementById('reviewForm');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const recruiterSelect = document.getElementById('recruiter_id');
+            const ratingInputs = document.querySelectorAll('input[name="rating"]');
+            const reviewText = document.getElementById('review_text');
+            
+            let isValid = true;
+            
+            // Validate company selection
+            if (!recruiterSelect.value) {
+                showFieldError(recruiterSelect, 'Please select a company to review.');
+                isValid = false;
+            }
+            
+            // Validate rating
+            const ratingSelected = Array.from(ratingInputs).some(input => input.checked);
+            if (!ratingSelected) {
+                showFieldError(ratingInputs[0], 'Please provide a rating.');
+                isValid = false;
+            }
+            
+            // Validate review text
+            if (!reviewText.value.trim()) {
+                showFieldError(reviewText, 'Please provide a detailed review.');
+                isValid = false;
+            } else if (reviewText.value.trim().length < 50) {
+                showFieldError(reviewText, 'Review must be at least 50 characters long.');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    }
+}
+
+// Show field error
+function showFieldError(field, message) {
+    // Remove existing error
+    const existingError = field.parentNode.querySelector('.error-message');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Add error class
+    field.classList.add('error');
+    
+    // Add error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    
+    field.parentNode.appendChild(errorDiv);
+}
+
+// Select company for review
+function selectCompanyForReview(recruiterId, companyName) {
+    // Switch to submit review tab
+    showTab('submit-review');
+    
+    // Select the company in the dropdown
+    const recruiterSelect = document.getElementById('recruiter_id');
+    if (recruiterSelect) {
+        recruiterSelect.value = recruiterId;
+    }
+    
+    // Scroll to form
+    document.getElementById('submit-review').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+    });
+}
+
+// Clear form errors on input
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('error')) {
+        e.target.classList.remove('error');
+        const errorMessage = e.target.parentNode.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    }
+});
+
+// Clear form errors on change (for select and radio inputs)
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('error')) {
+        e.target.classList.remove('error');
+        const errorMessage = e.target.parentNode.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.remove();
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Registration - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .registration-container {
+        padding: 80px 0;
+        background-color: var(--light-color);
+        min-height: calc(100vh - 80px);
+        margin-top: 80px;
+    }
+    
+    .registration-form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: var(--white);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .registration-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .registration-header h1 {
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .registration-header p {
+        color: var(--gray-600);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .error-message {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-check input {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .form-check label {
+        margin-bottom: 0;
+    }
+    
+    .form-footer {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .form-footer p {
+        margin-top: 1rem;
+    }
+    
+    .form-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .form-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .flash-messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .flash-message {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 0.5rem;
+    }
+    
+    .flash-message.success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .flash-message.error {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .flash-message.info {
+        background-color: rgba(37, 99, 235, 0.1);
+        color: var(--primary-color);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="registration-container">
+    <div class="container">
+        <div class="registration-form-container">
+            <div class="registration-header">
+                <h1>Candidate Registration</h1>
+                <p>Create your candidate profile to start your job search journey</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('candidate.register') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                        {% if errors and errors.first_name %}
+                            <div class="error-message">{{ errors.first_name }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        {% if errors and errors.last_name %}
+                            <div class="error-message">{{ errors.last_name }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    {% if errors and errors.email %}
+                        <div class="error-message">{{ errors.email }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        {% if errors and errors.password %}
+                            <div class="error-message">{{ errors.password }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        {% if errors and errors.confirm_password %}
+                            <div class="error-message">{{ errors.confirm_password }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number (Optional)</label>
+                    <input type="tel" class="form-control" id="phone" name="phone">
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" placeholder="City, State/Province, Country" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="job_role">Current/Desired Job Role</label>
+                    <input type="text" class="form-control" id="job_role" name="job_role" placeholder="e.g. Software Engineer, Marketing Manager, Data Analyst">
+                </div>
+                
+                <div class="form-group">
+                    <label for="skills">Skills (Separate with commas)</label>
+                    <input type="text" class="form-control" id="skills" name="skills" placeholder="e.g. Python, JavaScript, Project Management">
+                </div>
+                
+                <div class="form-group">
+                    <label for="years_experience">Years of Experience</label>
+                    <select class="form-control" id="years_experience" name="years_experience">
+                        <option value="0">Less than 1 year</option>
+                        <option value="1">1 year</option>
+                        <option value="2">2 years</option>
+                        <option value="3">3 years</option>
+                        <option value="4">4 years</option>
+                        <option value="5">5+ years</option>
+                        <option value="10">10+ years</option>
+                    </select>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">I agree to the <a href="#terms">Terms and Conditions</a> and <a href="#privacy">Privacy Policy</a></label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                
+                <div class="form-footer">
+                    <p>Already have an account? <a href="{{ url_for('main.login') }}">Login here</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

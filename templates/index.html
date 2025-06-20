@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block title %}Job Management Portal - Connect Talent with Opportunity{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Connect Talent with Opportunity</h1>
+            <p class="hero-subtitle">The ultimate job management platform for candidates and recruiters</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('candidate.register') }}" class="btn btn-primary btn-large">
+                    <i class="fas fa-search"></i> Find Jobs
+                </a>
+                <a href="{{ url_for('recruiter.register') }}" class="btn btn-outline btn-large">
+                    <i class="fas fa-plus"></i> Post Jobs
+                </a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img style="width:650px; height:400px;"  src="../static/img/job.jpeg" alt=" ">
+        </div>
+    </div>
+    
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" data-target="{{ stats.total_jobs if stats else 10000 }}">0</div>
+                <div class="stat-label">Active Jobs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="{{ stats.total_candidates if stats else 50000 }}">0</div>
+                <div class="stat-label">Registered Candidates</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="{{ stats.total_companies if stats else 5000 }}">0</div>
+                <div class="stat-label">Companies</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="{{ stats.success_rate if stats else 85 }}">0</div>
+                <div class="stat-label">Success Rate %</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Types Section -->
+<section class="user-types" id="features">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Built for Everyone</h2>
+            <p class="section-subtitle">Our platform serves three distinct user types with tailored experiences</p>
+        </div>
+        
+        <div class="user-cards">
+            <div class="user-card candidate-card" data-aos="fade-up">
+                <div class="card-header">
+                    <div class="user-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>For Candidates</h3>
+                    <p>Discover your dream job and advance your career</p>
+                </div>
+                
+                <div class="card-body">
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Browse thousands of job opportunities</li>
+                        <li><i class="fas fa-check"></i> Create professional profiles</li>
+                        <li><i class="fas fa-check"></i> One-click job applications</li>
+                        <li><i class="fas fa-check"></i> Real-time application tracking</li>
+                        <li><i class="fas fa-check"></i> Personalized job recommendations</li>
+                        <li><i class="fas fa-check"></i> Interview scheduling</li>
+                    </ul>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{{ url_for('candidate.register') }}" class="btn btn-primary btn-full">
+                        Get Started <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="user-card recruiter-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header">
+                    <div class="user-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>For Recruiters</h3>
+                    <p>Find perfect candidates and streamline hiring</p>
+                </div>
+                
+                <div class="card-body">
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> Post and manage job listings</li>
+                        <li><i class="fas fa-check"></i> Advanced candidate search</li>
+                        <li><i class="fas fa-check"></i> Application management system</li>
+                        <li><i class="fas fa-check"></i> Interview scheduling tools</li>
+                        <li><i class="fas fa-check"></i> Team collaboration features</li>
+                        <li><i class="fas fa-check"></i> Detailed analytics & reports</li>
+                    </ul>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{{ url_for('recruiter.register') }}" class="btn btn-primary btn-full">
+                        Start Hiring <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="user-card admin-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header">
+                    <div class="user-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3>For Administrators</h3>
+                    <p>Oversee platform with comprehensive tools</p>
+                </div>
+                
+                <div class="card-body">
+                    <ul class="features-list">
+                        <li><i class="fas fa-check"></i> User account management</li>
+                        <li><i class="fas fa-check"></i> Platform activity monitoring</li>
+                        <li><i class="fas fa-check"></i> Comprehensive reporting</li>
+                        <li><i class="fas fa-check"></i> System configuration</li>
+                        <li><i class="fas fa-check"></i> Content moderation</li>
+                        <li><i class="fas fa-check"></i> Security & compliance</li>
+                    </ul>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{{ url_for('admin.login') }}" class="btn btn-primary btn-full">
+                        Admin Access <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Why Choose Our Platform?</h2>
+            <p class="section-subtitle">Powerful features that make job searching and hiring effortless</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-item" data-aos="fade-up">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h4>Smart Job Matching</h4>
+                <p>AI-powered algorithms match candidates with relevant opportunities based on skills and preferences.</p>
+            </div>
+            
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>Secure & Reliable</h4>
+                <p>Enterprise-grade security with advanced encryption and privacy controls to protect your data.</p>
+            </div>
+            
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>Analytics & Insights</h4>
+                <p>Comprehensive analytics help make data-driven decisions and optimize hiring processes.</p>
+            </div>
+            
+            <div class="feature-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Mobile Friendly</h4>
+                <p>Responsive design that works seamlessly across all devices and screen sizes.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Transform Your Career or Hiring Process?</h2>
+            <p>Join thousands of professionals who trust our platform for their job search and recruitment needs.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('main.register') }}" class="btn btn-primary btn-large">
+                    Get Started Today <i class="fas fa-rocket"></i>
+                </a>
+                <a href="#contact" class="btn btn-outline btn-large">
+                    Request Demo <i class="fas fa-play"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

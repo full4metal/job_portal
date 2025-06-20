@@ -1,0 +1,128 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Candidate Dashboard - Job Management Portal{% endblock %}
+
+{% block content %}
+<section class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-header-section">
+            <h1>Welcome back, {{ candidate.first_name }}!</h1>
+            <p>Here's what's happening with your job search</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number-alt">{{ stats.total_applications }}</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number-alt">{{ stats.pending_applications }}</div>
+                <div class="stat-label">Total Applied</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number-alt">{{ stats.interview_invites }}</div>
+                <div class="stat-label">Total Interview</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-number-alt">{{ stats.total_jobs }}</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-content">
+            <div class="main-content">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Applications</h3>
+                        <a href="{{ url_for('candidate.applications') }}" class="card-action">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_applications %}
+                            {% for application in recent_applications %}
+                            <div class="application-item">
+                                <div class="item-title">{{ application.job.title }}</div>
+                                <div class="item-company">{{ application.job.recruiter.company_name }}</div>
+                                <div class="item-meta">
+                                    <span>Applied {{ application.application_date.strftime('%B %d, %Y') }}</span>
+                                    <span class="status-badge status-{{ application.status }}">{{ application.status.title() }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                                <p>No applications yet. <a href="{{ url_for('candidate.jobs') }}">Browse jobs</a> to get started!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recommended Jobs</h3>
+                        <a href="{{ url_for('candidate.recommendations') }}" class="card-action">View All</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recommended_jobs %}
+                            {% for job in recommended_jobs %}
+                            <div class="job-item">
+                                <div class="item-title">{{ job.title }}</div>
+                                <div class="item-company">{{ job.recruiter.company_name }}</div>
+                                <div class="item-meta">
+                                    <span>{{ job.location }}</span>
+                                    <span>{{ job.posted_date.strftime('%b %d') }}</span>
+                                    {% if job.recommendation_score %}
+                                        <span class="recommendation-score">
+                                            {{ (job.recommendation_score)|round|int }}% Match
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {% if job.recommendation_explanation %}
+                                    <div class="recommendation-reason">
+                                        {{ job.recommendation_explanation.match_quality }} match
+                                        {% if job.recommendation_explanation.reasons %}
+                                            - {{ job.recommendation_explanation.reasons[0] }}
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-search" style="font-size: 2rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+                                <p>No recommendations available. <a href="{{ url_for('candidate.profile') }}">Update your profile</a> to get better recommendations.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.recommendation-score {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.recommendation-reason {
+    font-size: 0.85rem;
+    color: var(--gray-600);
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+</style>
+{% endblock %}

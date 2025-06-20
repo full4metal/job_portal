@@ -1,0 +1,704 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Post New Job - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .job-form-container {
+        padding: 2rem 0;
+    }
+    
+    .job-form-header {
+        background-color: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .job-form-header h1 {
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .job-form-header p {
+        color: var(--gray-600);
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+    
+    .job-form-card {
+        background-color: var(--white);
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--gray-700);
+        font-size: 0.95rem;
+    }
+    
+    .required {
+        color: var(--danger-color);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-control.error {
+        border-color: var(--danger-color);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+    
+    .form-control-lg {
+        min-height: 150px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-help {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.25rem;
+    }
+    
+    .error-message {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .skills-input-container {
+        position: relative;
+    }
+    
+    .skills-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        min-height: 2rem;
+    }
+    
+    .skill-tag {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .skill-tag .remove-skill {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+    }
+    
+    .skill-tag .remove-skill:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .btn-secondary {
+        background-color: var(--gray-200);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--gray-300);
+        color: var(--gray-800);
+    }
+    
+    .flash-messages {
+        margin-bottom: 2rem;
+    }
+    
+    .flash-message {
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .flash-message.success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .flash-message.error {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .preview-section {
+        background-color: var(--gray-50);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-top: 2rem;
+        border: 1px solid var(--gray-200);
+    }
+    
+    .preview-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .job-form-card {
+            padding: 1.5rem;
+            margin: 0 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .job-form-header {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="job-form-container">
+    <div class="container">
+        <div class="job-form-header">
+            <h1>
+                <i class="fas fa-plus-circle"></i>
+                Post New Job
+            </h1>
+            <p>Create a detailed job posting to attract the best candidates</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="job-form-card">
+            <form method="POST" action="{{ url_for('recruiter.create_job') }}" id="jobForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Basic Information
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="title">Job Title <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               value="{{ request.form.title if request.form.title }}" 
+                               placeholder="e.g. Senior Software Engineer" required>
+                        {% if errors and errors.title %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.title }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">Enter a clear and descriptive job title</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location">Location <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   value="{{ request.form.location if request.form.location }}" 
+                                   placeholder="e.g. New York, NY or Remote" required>
+                            {% if errors and errors.location %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.location }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="salary_range">Salary Range</label>
+                            <input type="text" class="form-control" id="salary_range" name="salary_range" 
+                                   value="{{ request.form.salary_range if request.form.salary_range }}" 
+                                   placeholder="e.g. $80,000 - $120,000">
+                            {% if errors and errors.salary_range %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.salary_range }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">Optional: Helps attract qualified candidates</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job Description Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        Job Description
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="description">Job Description <span class="required">*</span></label>
+                        <textarea class="form-control form-control-lg" id="description" name="description" 
+                                  placeholder="Describe the role, responsibilities, and what makes this position exciting..." required>{{ request.form.description if request.form.description }}</textarea>
+                        {% if errors and errors.description %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.description }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">Include responsibilities, company culture, and growth opportunities</div>
+                    </div>
+                </div>
+                
+                <!-- Requirements Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-clipboard-check"></i>
+                        Requirements
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="skills_required">Required Skills <span class="required">*</span></label>
+                        <div class="skills-input-container">
+                            <input type="text" class="form-control" id="skills_input" 
+                                   placeholder="Type a skill and press Enter (e.g. Python, JavaScript, React)">
+                            <input type="hidden" id="skills_required" name="skills_required" 
+                                   value="{{ request.form.skills_required if request.form.skills_required }}">
+                            <div class="skills-tags" id="skillsTags"></div>
+                        </div>
+                        {% if errors and errors.skills_required %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.skills_required }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">Add skills one by one. Press Enter after each skill.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="required_experience">Required Experience <span class="required">*</span></label>
+                        <select class="form-control" id="required_experience" name="required_experience" required>
+                            <option value="">Select experience level</option>
+                            <option value="0" {{ 'selected' if request.form.required_experience == '0' }}>Entry Level (0-1 years)</option>
+                            <option value="1" {{ 'selected' if request.form.required_experience == '1' }}>Junior (1-2 years)</option>
+                            <option value="3" {{ 'selected' if request.form.required_experience == '3' }}>Mid-Level (3-5 years)</option>
+                            <option value="5" {{ 'selected' if request.form.required_experience == '5' }}>Senior (5-8 years)</option>
+                            <option value="8" {{ 'selected' if request.form.required_experience == '8' }}>Lead (8+ years)</option>
+                            <option value="10" {{ 'selected' if request.form.required_experience == '10' }}>Executive (10+ years)</option>
+                        </select>
+                        {% if errors and errors.required_experience %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.required_experience }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{{ url_for('recruiter.jobs') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="button" class="btn btn-outline" id="previewBtn">
+                        <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Post Job
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Preview Section (Hidden by default) -->
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <h4 class="preview-title">
+                    <i class="fas fa-eye"></i>
+                    Job Preview
+                </h4>
+                <div id="previewContent"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initSkillsInput();
+    initFormValidation();
+    initPreview();
+});
+
+// Skills Input Functionality
+function initSkillsInput() {
+    const skillsInput = document.getElementById('skills_input');
+    const skillsHidden = document.getElementById('skills_required');
+    const skillsContainer = document.getElementById('skillsTags');
+    let skills = [];
+    
+    // Load existing skills if any
+    if (skillsHidden.value) {
+        skills = skillsHidden.value.split(',').map(s => s.trim()).filter(s => s);
+        renderSkills();
+    }
+    
+    skillsInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addSkill();
+        }
+    });
+    
+    skillsInput.addEventListener('blur', function() {
+        if (this.value.trim()) {
+            addSkill();
+        }
+    });
+    
+    function addSkill() {
+        const skill = skillsInput.value.trim();
+        if (skill && !skills.includes(skill)) {
+            skills.push(skill);
+            skillsInput.value = '';
+            updateHiddenInput();
+            renderSkills();
+        }
+    }
+    
+    function removeSkill(index) {
+        skills.splice(index, 1);
+        updateHiddenInput();
+        renderSkills();
+    }
+    
+    function updateHiddenInput() {
+        skillsHidden.value = skills.join(', ');
+    }
+    
+    function renderSkills() {
+        skillsContainer.innerHTML = '';
+        skills.forEach((skill, index) => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `
+                ${skill}
+                <button type="button" class="remove-skill" onclick="removeSkillByIndex(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            skillsContainer.appendChild(tag);
+        });
+    }
+    
+    // Make removeSkill function global
+    window.removeSkillByIndex = removeSkill;
+}
+
+// Form Validation
+function initFormValidation() {
+    const form = document.getElementById('jobForm');
+    const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', clearError);
+    });
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!validateField.call(input)) {
+                isValid = false;
+            }
+        });
+        
+        // Validate skills
+        const skillsHidden = document.getElementById('skills_required');
+        if (!skillsHidden.value.trim()) {
+            showFieldError(document.getElementById('skills_input'), 'At least one skill is required');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = form.querySelector('.form-control.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+    
+    function validateField() {
+        const field = this;
+        clearError.call(field);
+        
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            showFieldError(field, 'This field is required');
+            return false;
+        }
+        
+        // Additional validations
+        if (field.type === 'email' && field.value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(field.value)) {
+                showFieldError(field, 'Please enter a valid email address');
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    function clearError() {
+        this.classList.remove('error');
+        const errorMsg = this.parentNode.querySelector('.error-message');
+        if (errorMsg) {
+            errorMsg.remove();
+        }
+    }
+    
+    function showFieldError(field, message) {
+        field.classList.add('error');
+        
+        // Remove existing error message
+        const existingError = field.parentNode.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Add new error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        
+        const helpText = field.parentNode.querySelector('.form-help');
+        if (helpText) {
+            field.parentNode.insertBefore(errorDiv, helpText);
+        } else {
+            field.parentNode.appendChild(errorDiv);
+        }
+    }
+}
+
+// Preview Functionality
+function initPreview() {
+    const previewBtn = document.getElementById('previewBtn');
+    const previewSection = document.getElementById('previewSection');
+    const previewContent = document.getElementById('previewContent');
+    
+    previewBtn.addEventListener('click', function() {
+        const formData = new FormData(document.getElementById('jobForm'));
+        
+        const title = formData.get('title') || 'Job Title';
+        const location = formData.get('location') || 'Location';
+        const salaryRange = formData.get('salary_range') || 'Salary not specified';
+        const description = formData.get('description') || 'No description provided';
+        const skills = formData.get('skills_required') || 'No skills specified';
+        const experience = getExperienceText(formData.get('required_experience'));
+        
+        previewContent.innerHTML = `
+            <div style="border: 1px solid var(--gray-200); border-radius: 8px; padding: 1.5rem; background: white;">
+                <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">${title}</h3>
+                <div style="color: var(--gray-600); margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <span><i class="fas fa-map-marker-alt"></i> ${location}</span>
+                    <span><i class="fas fa-dollar-sign"></i> ${salaryRange}</span>
+                    <span><i class="fas fa-clock"></i> ${experience}</span>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Description</h4>
+                    <p style="color: var(--gray-700); line-height: 1.6; white-space: pre-wrap;">${description}</p>
+                </div>
+                
+                <div>
+                    <h4 style="color: var(--dark-color); margin-bottom: 0.5rem;">Required Skills</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        ${skills.split(',').map(skill => 
+                            `<span style="background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem;">${skill.trim()}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        previewSection.style.display = 'block';
+        previewSection.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    function getExperienceText(value) {
+        const experienceMap = {
+            '0': 'Entry Level (0-1 years)',
+            '1': 'Junior (1-2 years)',
+            '3': 'Mid-Level (3-5 years)',
+            '5': 'Senior (5-8 years)',
+            '8': 'Lead (8+ years)',
+            '10': 'Executive (10+ years)'
+        };
+        return experienceMap[value] || 'Experience not specified';
+    }
+}
+
+// Auto-save functionality (optional)
+function initAutoSave() {
+    const form = document.getElementById('jobForm');
+    const inputs = form.querySelectorAll('input, textarea, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', debounce(saveFormData, 1000));
+    });
+    
+    function saveFormData() {
+        const formData = new FormData(form);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        localStorage.setItem('jobFormDraft', JSON.stringify(data));
+    }
+    
+    function loadFormData() {
+        const saved = localStorage.getItem('jobFormDraft');
+        if (saved) {
+            const data = JSON.parse(saved);
+            Object.keys(data).forEach(key => {
+                const field = form.querySelector(`[name="${key}"]`);
+                if (field) {
+                    field.value = data[key];
+                }
+            });
+        }
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Load saved data on page load
+    loadFormData();
+    
+    // Clear saved data on successful submit
+    form.addEventListener('submit', function() {
+        localStorage.removeItem('jobFormDraft');
+    });
+}
+
+// Initialize auto-save
+// initAutoSave();
+</script>
+{% endblock %}

@@ -1,0 +1,668 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Edit Profile - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-profile-container {
+        padding: 2rem 0;
+    }
+    
+    .edit-profile-header {
+        background-color: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .edit-profile-header h1 {
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .edit-profile-header p {
+        color: var(--gray-600);
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+    
+    .edit-profile-card {
+        background-color: var(--white);
+        padding: 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--gray-700);
+        font-size: 0.95rem;
+    }
+    
+    .required {
+        color: var(--danger-color);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-control.error {
+        border-color: var(--danger-color);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-help {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.25rem;
+    }
+    
+    .error-message {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .skills-input-container {
+        position: relative;
+    }
+    
+    .skills-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        min-height: 2rem;
+    }
+    
+    .skill-tag {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .skill-tag .remove-skill {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+    }
+    
+    .skill-tag .remove-skill:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .btn-secondary {
+        background-color: var(--gray-200);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-300);
+    }
+    
+    .btn-secondary:hover {
+        background-color: var(--gray-300);
+        color: var(--gray-800);
+    }
+    
+    .flash-messages {
+        margin-bottom: 2rem;
+    }
+    
+    .flash-message {
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .flash-message.success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .flash-message.error {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        font-weight: 600;
+        margin: 0 auto 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .edit-profile-card {
+            padding: 1.5rem;
+            margin: 0 1rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .edit-profile-header {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="edit-profile-container">
+    <div class="container">
+        <div class="edit-profile-header">
+            <h1>
+                <i class="fas fa-user-edit"></i>
+                Edit Profile
+            </h1>
+            <p>Update your personal and professional information</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="edit-profile-card">
+            <div class="profile-avatar">
+                {{ candidate.first_name[0] if candidate.first_name else 'U' }}{{ candidate.last_name[0] if candidate.last_name else 'U' }}
+            </div>
+            
+            <form method="POST" action="{{ url_for('candidate.edit_profile') }}" id="profileForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Personal Information
+                    </h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">First Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                   value="{{ candidate.first_name }}" required>
+                            {% if errors and errors.first_name %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.first_name }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last_name">Last Name <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                   value="{{ candidate.last_name }}" required>
+                            {% if errors and errors.last_name %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.last_name }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ candidate.phone or '' }}" placeholder="+1 (555) 123-4567">
+                            {% if errors and errors.phone %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.phone }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">Optional: Include country code for international numbers</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="location">Current Location</label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   value="{{ candidate.location or '' }}" placeholder="City, State/Province, Country">
+                            {% if errors and errors.location %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.location }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">Where are you currently located?</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Professional Information Section -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-briefcase"></i>
+                        Professional Information
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="job_role">Current/Desired Job Role</label>
+                        <input type="text" class="form-control" id="job_role" name="job_role" 
+                               value="{{ candidate.job_role or '' }}" placeholder="e.g. Software Engineer, Marketing Manager, Data Analyst">
+                        {% if errors and errors.job_role %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.job_role }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">What is your current job title or the role you're seeking?</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="skills">Skills</label>
+                        <div class="skills-input-container">
+                            <input type="text" class="form-control" id="skills_input" 
+                                   placeholder="Type a skill and press Enter (e.g. Python, JavaScript, Project Management)">
+                            <input type="hidden" id="skills" name="skills" 
+                                   value="{{ candidate.candidate_skills or '' }}">
+                            <div class="skills-tags" id="skillsTags"></div>
+                        </div>
+                        {% if errors and errors.skills %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.skills }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">Add your technical and soft skills. Press Enter after each skill.</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="years_experience">Years of Experience</label>
+                            <select class="form-control" id="years_experience" name="years_experience">
+                                <option value="0" {{ 'selected' if candidate.years_experience == 0 }}>Less than 1 year</option>
+                                <option value="1" {{ 'selected' if candidate.years_experience == 1 }}>1 year</option>
+                                <option value="2" {{ 'selected' if candidate.years_experience == 2 }}>2 years</option>
+                                <option value="3" {{ 'selected' if candidate.years_experience == 3 }}>3 years</option>
+                                <option value="4" {{ 'selected' if candidate.years_experience == 4 }}>4 years</option>
+                                <option value="5" {{ 'selected' if candidate.years_experience == 5 }}>5 years</option>
+                                <option value="6" {{ 'selected' if candidate.years_experience == 6 }}>6 years</option>
+                                <option value="7" {{ 'selected' if candidate.years_experience == 7 }}>7 years</option>
+                                <option value="8" {{ 'selected' if candidate.years_experience == 8 }}>8 years</option>
+                                <option value="9" {{ 'selected' if candidate.years_experience == 9 }}>9 years</option>
+                                <option value="10" {{ 'selected' if candidate.years_experience >= 10 }}>10+ years</option>
+                            </select>
+                            {% if errors and errors.years_experience %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.years_experience }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="salary_expectation">Salary Expectation</label>
+                            <input type="text" class="form-control" id="salary_expectation" name="salary_expectation" 
+                                   value="{{ candidate.salary_expectation or '' }}" placeholder="e.g. $80,000 - $120,000">
+                            {% if errors and errors.salary_expectation %}
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    {{ errors.salary_expectation }}
+                                </div>
+                            {% endif %}
+                            <div class="form-help">Optional: Helps match you with suitable positions</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preferred_job_location">Preferred Job Location</label>
+                        <input type="text" class="form-control" id="preferred_job_location" name="preferred_job_location" 
+                               value="{{ candidate.preferred_job_location or '' }}" placeholder="e.g. Remote, New York, NY, or Flexible">
+                        {% if errors and errors.preferred_job_location %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ errors.preferred_job_location }}
+                            </div>
+                        {% endif %}
+                        <div class="form-help">Where would you like to work? Include "Remote" if you're open to remote work.</div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="{{ url_for('candidate.profile') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initSkillsInput();
+    initFormValidation();
+});
+
+// Skills Input Functionality
+function initSkillsInput() {
+    const skillsInput = document.getElementById('skills_input');
+    const skillsHidden = document.getElementById('skills');
+    const skillsContainer = document.getElementById('skillsTags');
+    let skills = [];
+    
+    // Load existing skills if any
+    if (skillsHidden.value) {
+        skills = skillsHidden.value.split(',').map(s => s.trim()).filter(s => s);
+        renderSkills();
+    }
+    
+    skillsInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addSkill();
+        }
+    });
+    
+    skillsInput.addEventListener('blur', function() {
+        if (this.value.trim()) {
+            addSkill();
+        }
+    });
+    
+    function addSkill() {
+        const skill = skillsInput.value.trim();
+        if (skill && !skills.includes(skill)) {
+            skills.push(skill);
+            skillsInput.value = '';
+            updateHiddenInput();
+            renderSkills();
+        }
+    }
+    
+    function removeSkill(index) {
+        skills.splice(index, 1);
+        updateHiddenInput();
+        renderSkills();
+    }
+    
+    function updateHiddenInput() {
+        skillsHidden.value = skills.join(', ');
+    }
+    
+    function renderSkills() {
+        skillsContainer.innerHTML = '';
+        skills.forEach((skill, index) => {
+            const tag = document.createElement('div');
+            tag.className = 'skill-tag';
+            tag.innerHTML = `
+                ${skill}
+                <button type="button" class="remove-skill" onclick="removeSkillByIndex(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            skillsContainer.appendChild(tag);
+        });
+    }
+    
+    // Make removeSkill function global
+    window.removeSkillByIndex = removeSkill;
+}
+
+// Form Validation
+function initFormValidation() {
+    const form = document.getElementById('profileForm');
+    const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', clearError);
+    });
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!validateField.call(input)) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = form.querySelector('.form-control.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+    
+    function validateField() {
+        const field = this;
+        clearError.call(field);
+        
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            showFieldError(field, 'This field is required');
+            return false;
+        }
+        
+        // Additional validations
+        if (field.type === 'email' && field.value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(field.value)) {
+                showFieldError(field, 'Please enter a valid email address');
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    function clearError() {
+        this.classList.remove('error');
+        const errorMsg = this.parentNode.querySelector('.error-message');
+        if (errorMsg && !errorMsg.dataset.serverError) {
+            errorMsg.remove();
+        }
+    }
+    
+    function showFieldError(field, message) {
+        field.classList.add('error');
+        
+        // Remove existing client-side error message
+        const existingError = field.parentNode.querySelector('.error-message:not([data-server-error])');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Add new error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        
+        const helpText = field.parentNode.querySelector('.form-help');
+        if (helpText) {
+            field.parentNode.insertBefore(errorDiv, helpText);
+        } else {
+            field.parentNode.appendChild(errorDiv);
+        }
+    }
+}
+
+// Auto-save functionality (optional)
+function initAutoSave() {
+    const form = document.getElementById('profileForm');
+    const inputs = form.querySelectorAll('input, textarea, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', debounce(saveFormData, 2000));
+    });
+    
+    function saveFormData() {
+        const formData = new FormData(form);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        localStorage.setItem('profileFormDraft', JSON.stringify(data));
+        
+        // Show auto-save indicator
+        showAutoSaveIndicator();
+    }
+    
+    function showAutoSaveIndicator() {
+        // Create or update auto-save indicator
+        let indicator = document.getElementById('autoSaveIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'autoSaveIndicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--success-color);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                font-size: 0.875rem;
+                z-index: 1000;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            document.body.appendChild(indicator);
+        }
+        
+        indicator.textContent = 'Draft saved';
+        indicator.style.opacity = '1';
+        
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+        }, 2000);
+    }
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    // Clear saved data on successful submit
+    form.addEventListener('submit', function() {
+        localStorage.removeItem('profileFormDraft');
+    });
+}
+
+// Initialize auto-save (uncomment to enable)
+// initAutoSave();
+</script>
+{% endblock %}

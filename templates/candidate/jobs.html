@@ -1,0 +1,1162 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Browse Jobs - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style >
+ .jobs-container {
+  padding: 2rem 0;
+}
+
+.jobs-header {
+  background-color: #1a1a1a;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+}
+
+.jobs-header h1 {
+  color: #e5e5e5;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.jobs-header p {
+  color: #b3b3b3;
+  margin-bottom: 0;
+  font-size: 1.1rem;
+}
+
+.jobs-filters {
+  background-color: #1a1a1a;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: #cccccc;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.filter-control {
+  padding: 0.75rem 1rem;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background-color: #2a2a2a;
+  color: #e5e5e5;
+}
+
+.filter-control:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.search-input {
+  position: relative;
+}
+
+.search-input input {
+  padding-left: 2.5rem;
+  width: 100%;
+}
+
+.search-input i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999999;
+}
+
+select.filter-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+
+.clear-filters-btn {
+  background: none;
+  border: 1px solid #404040;
+  color: #b3b3b3;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clear-filters-btn:hover {
+  border-color: #60a5fa;
+  color: #60a5fa;
+  background-color: #2a2a2a;
+}
+
+.jobs-results {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  color: #b3b3b3;
+}
+
+.results-count {
+  font-weight: 500;
+}
+
+.sort-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-dropdown select {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid #404040;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  color: #e5e5e5;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+}
+
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.job-item {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.job-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  border-color: #60a5fa;
+}
+
+.job-content {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: start;
+}
+
+.job-main {
+  min-width: 0;
+}
+
+.job-header {
+  margin-bottom: 1rem;
+}
+
+.job-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #e5e5e5;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.job-title:hover {
+  color: #60a5fa;
+}
+
+.job-company {
+  font-size: 1.1rem;
+  color: #60a5fa;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  color: #b3b3b3;
+  font-size: 0.95rem;
+}
+
+.job-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.job-description {
+  color: #cccccc;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.job-skill {
+  background-color: #2a2a2a;
+  color: #cccccc;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #404040;
+}
+
+.job-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #999999;
+  font-size: 0.9rem;
+}
+
+.job-posted {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.job-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.apply-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #60a5fa;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.apply-btn:hover {
+  background-color: #3b82f6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+}
+
+.apply-btn.applied {
+  background-color: #4ade80;
+  cursor: default;
+}
+
+.apply-btn.applied:hover {
+  background-color: #4ade80;
+  transform: none;
+  box-shadow: none;
+}
+
+.job-match {
+  background-color: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.empty-state {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: #666666;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+  color: #e5e5e5;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: #b3b3b3;
+  margin-bottom: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 3rem;
+}
+
+.pagination-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #404040;
+  background-color: #2a2a2a;
+  color: #cccccc;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+  border-color: #60a5fa;
+  color: #60a5fa;
+  background-color: #1a1a1a;
+}
+
+.pagination-btn.active {
+  background-color: #60a5fa;
+  color: #ffffff;
+  border-color: #60a5fa;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading State */
+.loading-skeleton {
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.job-skeleton {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  border: 1px solid #333333;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 60%;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-company {
+  height: 18px;
+  width: 40%;
+  margin-bottom: 1rem;
+}
+
+.skeleton-meta {
+  height: 16px;
+  width: 80%;
+  margin-bottom: 1rem;
+}
+
+.skeleton-description {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filters-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .jobs-results {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .job-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .job-actions {
+    align-items: stretch;
+  }
+
+  .apply-btn {
+    justify-content: center;
+  }
+
+  .job-meta {
+    gap: 1rem;
+  }
+
+  .job-skills {
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .jobs-container {
+    padding: 1rem 0;
+  }
+
+  .jobs-header,
+  .jobs-filters {
+    padding: 1.5rem;
+  }
+
+  .job-content {
+    padding: 1.5rem;
+  }
+
+  .job-title {
+    font-size: 1.25rem;
+  }
+
+  .job-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background-color: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 500px;
+  margin: 0 1rem;
+  transform: translateY(-20px);
+  transition: transform 0.2s ease;
+}
+
+.modal-backdrop.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #333333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e5e5e5;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #999999;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background-color: #2a2a2a;
+  color: #cccccc;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  color: #e5e5e5;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #333333;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.btn-danger {
+  background-color: #f87171;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background-color: #ef4444;
+}
+
+.btn-secondary {
+  background-color: #374151;
+  color: #e5e5e5;
+  border: 1px solid #404040;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #4b5563;
+  border-color: #60a5fa;
+}
+
+/* Job Status Indicators */
+.job-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-new {
+  background-color: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.status-urgent {
+  background-color: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.status-featured {
+  background-color: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+/* Salary Range Styling */
+.job-salary {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* Company Logo Placeholder */
+.company-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  border: 2px solid #404040;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #60a5fa;
+  font-size: 1.2rem;
+}
+
+/* Enhanced Job Card Layout */
+.job-card-enhanced {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.job-card-enhanced .company-logo {
+  margin-top: 0.25rem;
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+<section class="jobs-container">
+    <div class="container">
+        <div class="jobs-header">
+            <h1>
+                <i class="fas fa-search"></i>
+                Browse Jobs
+            </h1>
+            <p>Discover exciting career opportunities that match your skills and interests</p>
+        </div>
+        
+        <div class="jobs-filters">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="searchInput">Search Jobs</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="filter-control" placeholder="Job title, company, or keywords...">
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="locationFilter">Location</label>
+                    <select id="locationFilter" class="filter-control">
+                        <option value="">All Locations</option>
+                        {% for location in locations %}
+                            <option value="{{ location }}">{{ location }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="experienceFilter">Experience Level</label>
+                    <select id="experienceFilter" class="filter-control">
+                        <option value="">All Levels</option>
+                        <option value="0">Entry Level (0-1 years)</option>
+                        <option value="1">Junior (1-2 years)</option>
+                        <option value="3">Mid-Level (3-5 years)</option>
+                        <option value="5">Senior (5-8 years)</option>
+                        <option value="8">Lead (8+ years)</option>
+                        <option value="10">Executive (10+ years)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="skillsFilter">Skills</label>
+                    <select id="skillsFilter" class="filter-control">
+                        <option value="">All Skills</option>
+                        {% for skill in skills %}
+                            <option value="{{ skill }}">{{ skill }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="clear-filters-btn" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="jobs-results">
+            <div class="results-count">
+                <span id="resultsCount">{{ jobs|length }}</span> jobs found
+            </div>
+            <div class="sort-dropdown">
+                <label for="sortBy">Sort by:</label>
+                <select id="sortBy">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="title">Job Title</option>
+                    <option value="company">Company</option>
+                    <option value="location">Location</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="jobs-list" id="jobsList">
+            {% if jobs %}
+                {% for job in jobs %}
+                    <div class="job-item" 
+                         data-title="{{ job.title.lower() }}"
+                         data-company="{{ job.recruiter.company_name.lower() }}"
+                         data-location="{{ job.location.lower() }}"
+                         data-skills="{{ job.skills_required.lower() }}"
+                         data-experience="{{ job.required_experience }}"
+                         data-posted="{{ job.posted_date.strftime('%Y-%m-%d') }}">
+                        
+                        <div class="job-content">
+                            <div class="job-main">
+                                <div class="job-header">
+                                    <a href="#" class="job-title" onclick="viewJobDetails({{ job.job_id }})">
+                                        {{ job.title }}
+                                    </a>
+                                    <div class="job-company">{{ job.recruiter.company_name }}</div>
+                                </div>
+                                
+                                <div class="job-meta">
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ job.location }}
+                                    </div>
+                                    {% if job.salary_range %}
+                                        <div class="job-meta-item">
+                                            <i class="fas fa-rupee-sign"></i>
+                                            {{ job.salary_range }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-clock"></i>
+                                        {% if job.required_experience == 0 %}
+                                            Entry Level
+                                        {% elif job.required_experience <= 2 %}
+                                            Junior Level
+                                        {% elif job.required_experience <= 5 %}
+                                            Mid Level
+                                        {% elif job.required_experience <= 8 %}
+                                            Senior Level
+                                        {% else %}
+                                            Executive Level
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="job-description">
+                                    {{ job.description }}
+                                </div>
+                                
+                                <div class="job-skills">
+                                    {% for skill in job.skills_required.split(',')[:6] %}
+                                        <span class="job-skill">{{ skill.strip() }}</span>
+                                    {% endfor %}
+                                    {% if job.skills_required.split(',')|length > 6 %}
+                                        <span class="job-skill">+{{ job.skills_required.split(',')|length - 6 }} more</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="job-footer">
+                                    <div class="job-posted">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Posted {{ job.posted_date.strftime('%B %d, %Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="job-actions">
+                                {% set has_applied = job.applications|selectattr('candidate_id', 'equalto', session.candidate_id)|list|length > 0 %}
+                                
+                                {% if has_applied %}
+                                    <button class="apply-btn applied" disabled>
+                                        <i class="fas fa-check"></i>
+                                        Applied
+                                    </button>
+                                {% else %}
+                                    <button class="apply-btn" onclick="applyToJob({{ job.job_id }}, '{{ job.title }}')">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Apply Now
+                                    </button>
+                                {% endif %}
+                                
+                        <!-- Match percentage (placeholder for future ML implementation)
+                                <div class="job-match">
+                                    <i class="fas fa-star"></i>
+                                    {{ range(75, 95) | random }}% Match
+                                </div>
+                            </div>
+                        </div>
+                    </div>  -->
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>No Jobs Available</h3>
+                    <p>There are currently no job postings available. Please check back later or adjust your search criteria.</p>
+                    <a href="{{ url_for('candidate.dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Pagination (for future implementation) -->
+        {% if jobs|length > 10 %}
+            <div class="pagination">
+                <a href="#" class="pagination-btn" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <a href="#" class="pagination-btn active">1</a>
+                <a href="#" class="pagination-btn">2</a>
+                <a href="#" class="pagination-btn">3</a>
+                <a href="#" class="pagination-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Job Application Modal -->
+<div class="modal-backdrop" id="applicationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-paper-plane"></i>
+                Apply for Job
+            </h4>
+            <button type="button" class="modal-close" onclick="closeApplicationModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to apply for <strong id="applicationJobTitle"></strong>?</p>
+            <p>Your profile and resume will be sent to the employer for review.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeApplicationModal()">
+                Cancel
+            </button>
+            <form id="applicationForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="job_id" id="applicationJobId">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Submit Application
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initFilters();
+    initSorting();
+    
+    // Ensure modal is hidden on page load
+    const modal = document.getElementById('applicationModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+});
+
+// Initialize filters
+function initFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const locationFilter = document.getElementById('locationFilter');
+    const experienceFilter = document.getElementById('experienceFilter');
+    const skillsFilter = document.getElementById('skillsFilter');
+    
+    [searchInput, locationFilter, experienceFilter, skillsFilter].forEach(element => {
+        if (element) {
+            element.addEventListener('input', filterJobs);
+            element.addEventListener('change', filterJobs);
+        }
+    });
+}
+
+// Initialize sorting
+function initSorting() {
+    const sortBy = document.getElementById('sortBy');
+    if (sortBy) {
+        sortBy.addEventListener('change', sortJobs);
+    }
+}
+
+// Filter jobs based on criteria
+function filterJobs() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+    const experienceFilter = document.getElementById('experienceFilter').value;
+    const skillsFilter = document.getElementById('skillsFilter').value.toLowerCase();
+    
+    const jobItems = document.querySelectorAll('.job-item');
+    let visibleCount = 0;
+    
+    jobItems.forEach(job => {
+        const title = job.getAttribute('data-title');
+        const company = job.getAttribute('data-company');
+        const location = job.getAttribute('data-location');
+        const skills = job.getAttribute('data-skills');
+        const experience = job.getAttribute('data-experience');
+        
+        const matchesSearch = !searchTerm || 
+            title.includes(searchTerm) || 
+            company.includes(searchTerm) || 
+            skills.includes(searchTerm);
+        
+        const matchesLocation = !locationFilter || location.includes(locationFilter);
+        
+        const matchesExperience = !experienceFilter || 
+            parseInt(experience) <= parseInt(experienceFilter) + 2;
+        
+        const matchesSkills = !skillsFilter || skills.includes(skillsFilter);
+        
+        if (matchesSearch && matchesLocation && matchesExperience && matchesSkills) {
+            job.style.display = '';
+            visibleCount++;
+        } else {
+            job.style.display = 'none';
+        }
+    });
+    
+    // Update results count
+    document.getElementById('resultsCount').textContent = visibleCount;
+    
+    // Show/hide empty state
+    const jobsList = document.getElementById('jobsList');
+    const emptyState = jobsList.querySelector('.empty-state');
+    
+    if (visibleCount === 0 && !emptyState) {
+        const noResultsElement = document.createElement('div');
+        noResultsElement.className = 'empty-state';
+        noResultsElement.innerHTML = `
+            <div class="empty-state-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>No Jobs Found</h3>
+            <p>No jobs match your current search criteria. Try adjusting your filters or search terms.</p>
+            <button class="btn btn-primary" onclick="clearAllFilters()">
+                <i class="fas fa-redo"></i> Clear All Filters
+            </button>
+        `;
+        jobsList.appendChild(noResultsElement);
+    } else if (visibleCount > 0 && emptyState) {
+        emptyState.remove();
+    }
+}
+
+// Sort jobs
+function sortJobs() {
+    const sortBy = document.getElementById('sortBy').value;
+    const jobsList = document.getElementById('jobsList');
+    const jobItems = Array.from(jobsList.querySelectorAll('.job-item'));
+    
+    jobItems.sort((a, b) => {
+        switch (sortBy) {
+            case 'newest':
+                return new Date(b.getAttribute('data-posted')) - new Date(a.getAttribute('data-posted'));
+            case 'oldest':
+                return new Date(a.getAttribute('data-posted')) - new Date(b.getAttribute('data-posted'));
+            case 'title':
+                return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
+            case 'company':
+                return a.getAttribute('data-company').localeCompare(b.getAttribute('data-company'));
+            case 'location':
+                return a.getAttribute('data-location').localeCompare(b.getAttribute('data-location'));
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted items
+    jobItems.forEach(item => jobsList.appendChild(item));
+}
+
+// Clear all filters
+function clearAllFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('locationFilter').value = '';
+    document.getElementById('experienceFilter').value = '';
+    document.getElementById('skillsFilter').value = '';
+    
+    filterJobs();
+}
+
+// Apply to job
+function applyToJob(jobId, jobTitle) {
+    const modal = document.getElementById('applicationModal');
+    const titleElement = document.getElementById('applicationJobTitle');
+    const jobIdInput = document.getElementById('applicationJobId');
+    const form = document.getElementById('applicationForm');
+    
+    if (!modal || !titleElement || !jobIdInput || !form) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    titleElement.textContent = jobTitle;
+    jobIdInput.value = jobId;
+    form.action = "{{ url_for('candidate.apply_job') }}";
+    
+    modal.classList.add('show');
+}
+
+// Close application modal
+function closeApplicationModal() {
+    const modal = document.getElementById('applicationModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('applicationModal');
+    if (event.target === modal) {
+        closeApplicationModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeApplicationModal();
+    }
+});
+
+// View job details (placeholder for future implementation)
+function viewJobDetails(jobId) {
+    // This would open a detailed job view modal or navigate to a job detail page
+    console.log('View job details for job ID:', jobId);
+    // For now, we'll just scroll to the job
+    event.preventDefault();
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('applicationModal');
+    if (event.target === modal) {
+        closeApplicationModal();
+    }
+});
+
+// Auto-save search preferences (optional)
+function saveSearchPreferences() {
+    const preferences = {
+        search: document.getElementById('searchInput').value,
+        location: document.getElementById('locationFilter').value,
+        experience: document.getElementById('experienceFilter').value,
+        skills: document.getElementById('skillsFilter').value,
+        sort: document.getElementById('sortBy').value
+    };
+    
+    localStorage.setItem('jobSearchPreferences', JSON.stringify(preferences));
+}
+
+// Load search preferences (optional)
+function loadSearchPreferences() {
+    const saved = localStorage.getItem('jobSearchPreferences');
+    if (saved) {
+        const preferences = JSON.parse(saved);
+        
+        document.getElementById('searchInput').value = preferences.search || '';
+        document.getElementById('locationFilter').value = preferences.location || '';
+        document.getElementById('experienceFilter').value = preferences.experience || '';
+        document.getElementById('skillsFilter').value = preferences.skills || '';
+        document.getElementById('sortBy').value = preferences.sort || 'newest';
+        
+        filterJobs();
+        sortJobs();
+    }
+}
+
+// Load preferences on page load
+loadSearchPreferences();
+
+// Save preferences when filters change
+document.addEventListener('change', saveSearchPreferences);
+document.addEventListener('input', debounce(saveSearchPreferences, 500));
+
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+</script>
+{% endblock %}

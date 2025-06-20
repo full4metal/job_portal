@@ -1,0 +1,774 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Job Recommendations - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .recommendations-container {
+        padding: 2rem 0;
+    }
+    
+    .recommendations-header {
+        background-color: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .recommendations-header h1 {
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .recommendations-header p {
+        color: var(--gray-600);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .refresh-btn {
+        background-color: var(--primary-color);
+        color: var(--white);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .refresh-btn:hover {
+        background-color: var(--primary-dark);
+    }
+    
+    .recommendations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .recommendation-item {
+        background-color: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: var(--transition);
+        border: 1px solid transparent;
+        position: relative;
+    }
+    
+    .recommendation-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
+    }
+    
+    .recommendation-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: var(--white);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    
+    .recommendation-content {
+        padding: 2rem;
+        padding-top: 3rem;
+    }
+    
+    .job-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .job-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        display: block;
+        transition: var(--transition);
+    }
+    
+    .job-title:hover {
+        color: var(--primary-color);
+    }
+    
+    .job-company {
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+    }
+    
+    .job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--gray-600);
+        font-size: 0.95rem;
+    }
+    
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .recommendation-explanation {
+        background-color: rgba(37, 99, 235, 0.05);
+        border-left: 4px solid var(--primary-color);
+        padding: 1rem;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 1.5rem;
+    }
+    
+    .explanation-title {
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .explanation-reasons {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .explanation-reasons li {
+        color: var(--gray-700);
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .explanation-reasons li:before {
+        content: "✓";
+        color: var(--success-color);
+        font-weight: bold;
+    }
+    
+    .skill-match {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--gray-200);
+    }
+    
+    .skill-match-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+    }
+    
+    .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .skill-tag {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .skill-matching {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .skill-missing {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .job-description {
+        color: var(--gray-700);
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .job-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .apply-btn {
+        padding: 0.75rem 1.5rem;
+        background-color: var(--primary-color);
+        color: var(--white);
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .apply-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .view-details-btn {
+        padding: 0.75rem 1.5rem;
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .view-details-btn:hover {
+        background-color: var(--primary-color);
+        color: var(--white);
+    }
+    
+    .empty-state {
+        background-color: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        color: var(--gray-400);
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        color: var(--dark-color);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        color: var(--gray-600);
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .match-quality {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .match-excellent {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: var(--success-color);
+    }
+    
+    .match-very-good {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: var(--primary-color);
+    }
+    
+    .match-good {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+    }
+    
+    .match-fair {
+        background-color: rgba(156, 163, 175, 0.1);
+        color: var(--gray-600);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .recommendations-container {
+            padding: 1rem 0;
+        }
+        
+        .recommendations-header {
+            padding: 1.5rem;
+        }
+        
+        .recommendation-content {
+            padding: 1.5rem;
+            padding-top: 3rem;
+        }
+        
+        .job-meta {
+            gap: 1rem;
+        }
+        
+        .job-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .apply-btn,
+        .view-details-btn {
+            justify-content: center;
+        }
+    }
+
+/* Modal Styles */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.7) translateY(-50px);
+    transition: all 0.3s ease;
+}
+
+.modal-backdrop.show .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+.modal-header {
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-title {
+    margin: 0;
+    color: var(--dark-color);
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background-color: var(--gray-100);
+    color: var(--gray-700);
+}
+
+.modal-body {
+    padding: 1.5rem 2rem;
+}
+
+.modal-body p {
+    margin-bottom: 1rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+.modal-footer {
+    padding: 1rem 2rem 1.5rem;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.modal-footer .btn {
+    min-width: 100px;
+}
+
+.btn-secondary {
+    background-color: var(--gray-200);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+}
+
+.btn-secondary:hover {
+    background-color: var(--gray-300);
+    color: var(--gray-800);
+}
+
+/* Responsive modal */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="recommendations-container">
+    <div class="container">
+        <div class="recommendations-header">
+            <h1>
+                <i class="fas fa-magic"></i>
+                Personalized Job Recommendations
+            </h1>
+            <p>Jobs tailored to your skills, experience, and preferences using advanced matching algorithms</p>
+            <button class="refresh-btn" onclick="refreshRecommendations()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh Recommendations
+            </button>
+        </div>
+        
+        <div class="recommendations-list">
+            {% if recommendations %}
+                {% for rec in recommendations %}
+                    {% set job = rec.job %}
+                    {% set explanation = rec.explanation %}
+                    <div class="recommendation-item">
+                        <div class="recommendation-badge">
+                            <i class="fas fa-star"></i>
+                            {{ explanation.similarity_score }}% Match
+                        </div>
+                        
+                        <div class="recommendation-content">
+                            <div class="job-header">
+                                <a href="#" class="job-title" onclick="viewJobDetails({{ job.job_id }})">
+                                    {{ job.title }}
+                                </a>
+                                <div class="job-company">{{ job.recruiter.company_name }}</div>
+                            </div>
+                            
+                            <div class="job-meta">
+                                <div class="job-meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ job.location }}
+                                </div>
+                                {% if job.salary_range %}
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-rupee-sign"></i>
+                                        {{ job.salary_range }}
+                                    </div>
+                                {% endif %}
+                                <div class="job-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    {% if job.required_experience == 0 %}
+                                        Entry Level
+                                    {% elif job.required_experience <= 2 %}
+                                        Junior Level
+                                    {% elif job.required_experience <= 5 %}
+                                        Mid Level
+                                    {% elif job.required_experience <= 8 %}
+                                        Senior Level
+                                    {% else %}
+                                        Executive Level
+                                    {% endif %}
+                                </div>
+                                <div class="job-meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Posted {{ job.posted_date.strftime('%B %d, %Y') }}
+                                </div>
+                            </div>
+                            
+                            <div class="recommendation-explanation">
+                                <div class="explanation-title">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Why this job matches you
+                                    <span class="match-quality match-{{ explanation.match_quality.lower().replace(' ', '-') }}">
+                                        {{ explanation.match_quality }} Match
+                                    </span>
+                                </div>
+                                
+                                {% if explanation.reasons %}
+                                    <ul class="explanation-reasons">
+                                        {% for reason in explanation.reasons %}
+                                            <li>{{ reason }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                                
+                                {% if explanation.skill_match %}
+                                    <div class="skill-match">
+                                        {% if explanation.skill_match.matching_skills %}
+                                            <div class="skill-match-title">
+                                                <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                                                Matching Skills ({{ explanation.skill_match.match_percentage }}% match)
+                                            </div>
+                                            <div class="skills-container">
+                                                {% for skill in explanation.skill_match.matching_skills %}
+                                                    <span class="skill-tag skill-matching">{{ skill.title() }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if explanation.skill_match.missing_skills %}
+                                            <div class="skill-match-title" style="margin-top: 1rem;">
+                                                <i class="fas fa-info-circle" style="color: var(--warning-color);"></i>
+                                                Skills to Learn
+                                            </div>
+                                            <div class="skills-container">
+                                                {% for skill in explanation.skill_match.missing_skills[:5] %}
+                                                    <span class="skill-tag skill-missing">{{ skill.title() }}</span>
+                                                {% endfor %}
+                                                {% if explanation.skill_match.missing_skills|length > 5 %}
+                                                    <span class="skill-tag skill-missing">+{{ explanation.skill_match.missing_skills|length - 5 }} more</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="job-description">
+                                {{ job.description }}
+                            </div>
+                            
+                            <div class="job-actions">
+                                {% set has_applied = job.applications|selectattr('candidate_id', 'equalto', session.candidate_id)|list|length > 0 %}
+                                
+                                {% if has_applied %}
+                                    <button class="apply-btn" style="background-color: var(--success-color);" disabled>
+                                        <i class="fas fa-check"></i>
+                                        Applied
+                                    </button>
+                                {% else %}
+                                    <button class="apply-btn" onclick="applyToJob({{ job.job_id }}, '{{ job.title }}')">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Apply Now
+                                    </button>
+                                {% endif %}
+                                
+                                <a href="#" class="view-details-btn" onclick="viewJobDetails({{ job.job_id }})">
+                                    <i class="fas fa-eye"></i>
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h3>No Recommendations Available</h3>
+                    <p>We need more information about your skills and preferences to provide personalized recommendations.</p>
+                    <a href="{{ url_for('candidate.profile') }}" class="btn btn-primary">
+                        <i class="fas fa-user-edit"></i> Update Your Profile
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Job Application Modal -->
+<div class="modal-backdrop" id="applicationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">
+                <i class="fas fa-paper-plane"></i>
+                Apply for Job
+            </h4>
+            <button type="button" class="modal-close" onclick="closeApplicationModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to apply for <strong id="applicationJobTitle"></strong>?</p>
+            <p>Your profile and resume will be sent to the employer for review.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeApplicationModal()">
+                Cancel
+            </button>
+            <form id="applicationForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="job_id" id="applicationJobId">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Submit Application
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Ensure modal is hidden on page load
+    const modal = document.getElementById('applicationModal');
+    if (modal) {
+        modal.classList.remove('show');
+        modal.style.display = 'none'; // Ensure it's completely hidden
+    }
+});
+
+// Apply to job
+function applyToJob(jobId, jobTitle) {
+    const modal = document.getElementById('applicationModal');
+    const titleElement = document.getElementById('applicationJobTitle');
+    const jobIdInput = document.getElementById('applicationJobId');
+    const form = document.getElementById('applicationForm');
+    
+    if (!modal || !titleElement || !jobIdInput || !form) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    titleElement.textContent = jobTitle;
+    jobIdInput.value = jobId;
+    form.action = "{{ url_for('candidate.apply_job') }}";
+    
+    // Show modal with proper animation
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+}
+
+// Close application modal
+function closeApplicationModal() {
+    const modal = document.getElementById('applicationModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('applicationModal');
+    if (event.target === modal) {
+        closeApplicationModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeApplicationModal();
+    }
+});
+
+// Refresh recommendations
+async function refreshRecommendations() {
+    const btn = document.querySelector('.refresh-btn');
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch("{{ url_for('candidate.refresh_recommendations') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            // Reload the page to show updated recommendations
+            window.location.reload();
+        } else {
+            alert('Failed to refresh recommendations: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error refreshing recommendations:', error);
+        alert('An error occurred while refreshing recommendations.');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// View job details (placeholder for future implementation)
+function viewJobDetails(jobId) {
+    console.log('View job details for job ID:', jobId);
+    event.preventDefault();
+}
+</script>
+{% endblock %}
