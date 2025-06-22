@@ -1,0 +1,842 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Company Reviews - {{ recruiter.company_name }} - Job Management Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reviews-container {
+        padding: 2rem 0;
+    }
+    
+    .reviews-header {
+        background-color: #1a1a1a;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+    }
+    
+    .company-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .company-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .company-details h1 {
+        color: #e5e5e5;
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+    }
+    
+    .company-details p {
+        color: #b3b3b3;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .company-meta {
+        display: flex;
+        gap: 2rem;
+        color: #999999;
+        font-size: 0.9rem;
+    }
+    
+    .company-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Review Statistics */
+    .review-stats {
+        background-color: #1a1a1a;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-title {
+        color: #e5e5e5;
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .overall-rating {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background-color: #2a2a2a;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #404040;
+    }
+    
+    .rating-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: #60a5fa;
+    }
+    
+    .rating-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .rating-stars {
+        color: #fbbf24;
+        font-size: 1.5rem;
+    }
+    
+    .rating-count {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background-color: #2a2a2a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #404040;
+        width:180px;
+        height:150px;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-positive {
+        color: #4ade80;
+    }
+    
+    .stat-negative {
+        color: #f87171;
+    }
+    
+    .stat-neutral {
+        color: #9ca3af;
+    }
+    
+    .stat-label {
+        color: #b3b3b3;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    /* Rating Distribution */
+    .rating-distribution {
+        background-color: #2a2a2a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #404040;
+    }
+    
+    .distribution-title {
+        color: #e5e5e5;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .rating-bar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .rating-bar:last-child {
+        margin-bottom: 0;
+    }
+    
+    .rating-label {
+        color: #b3b3b3;
+        font-size: 0.9rem;
+        min-width: 60px;
+    }
+    
+    .rating-progress {
+        flex: 1;
+        height: 8px;
+        background-color: #404040;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .rating-progress-fill {
+        height: 100%;
+        background-color: #60a5fa;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .rating-count-small {
+        color: #999999;
+        font-size: 0.8rem;
+        min-width: 30px;
+        text-align: right;
+    }
+    
+    /* Review Filters */
+    .review-filters {
+        background-color: #1a1a1a;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+    }
+    
+    .filters-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-group label {
+        font-weight: 500;
+        color: #cccccc;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .filter-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #2a2a2a;
+        color: #e5e5e5;
+    }
+    
+    .filter-control:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    select.filter-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        padding-right: 2.5rem;
+    }
+    
+    .clear-filters-btn {
+        background: none;
+        border: 1px solid #404040;
+        color: #b3b3b3;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .clear-filters-btn:hover {
+        border-color: #60a5fa;
+        color: #60a5fa;
+        background-color: #2a2a2a;
+    }
+    
+    /* Review Cards */
+    .reviews-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .review-card {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        border-color: #404040;
+    }
+    
+    .review-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #333333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .reviewer-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .reviewer-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .reviewer-details h4 {
+        color: #e5e5e5;
+        margin-bottom: 0.25rem;
+        font-size: 1.1rem;
+    }
+    
+    .review-date {
+        color: #999999;
+        font-size: 0.9rem;
+    }
+    
+    .review-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .review-stars {
+        color: #fbbf24;
+        font-size: 1.2rem;
+    }
+    
+    .rating-value {
+        color: #e5e5e5;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    
+    .review-body {
+        padding: 1.5rem;
+    }
+    
+    .review-text {
+        color: #cccccc;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+    }
+    
+    .review-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .sentiment-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .sentiment-positive {
+        background-color: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    
+    .sentiment-negative {
+        background-color: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .sentiment-neutral {
+        background-color: rgba(156, 163, 175, 0.15);
+        color: #9ca3af;
+        border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #666666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state h3 {
+        color: #e5e5e5;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state p {
+        color: #b3b3b3;
+        margin-bottom: 2rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination-btn {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #404040;
+        background-color: #2a2a2a;
+        color: #b3b3b3;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination-btn:hover {
+        border-color: #60a5fa;
+        color: #60a5fa;
+        background-color: #1a1a1a;
+        text-decoration: none;
+    }
+    
+    .pagination-btn.active {
+        background-color: #60a5fa;
+        color: #ffffff;
+        border-color: #60a5fa;
+    }
+    
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .reviews-container {
+            padding: 1rem 0;
+        }
+        
+        .reviews-header,
+        .review-stats,
+        .review-filters {
+            padding: 1.5rem;
+        }
+        
+        .company-info {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+        
+        .company-details h1 {
+            font-size: 1.5rem;
+        }
+        
+        .company-meta {
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .filters-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .review-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .overall-rating {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+        
+        .rating-number {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="reviews-container">
+    <div class="container">
+        <!-- Company Header -->
+        <div class="reviews-header">
+            <div class="company-info">
+                <div class="company-logo">
+                    {{ recruiter.company_name[0] if recruiter.company_name else 'C' }}
+                </div>
+                <div class="company-details">
+                    <h1>{{ recruiter.company_name }}</h1>
+                    {% if recruiter.company_description %}
+                        <p>{{ recruiter.company_description[:150] }}{% if recruiter.company_description|length > 150 %}...{% endif %}</p>
+                    {% endif %}
+                    <div class="company-meta">
+                        <div class="company-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ recruiter.company_location or 'Location not specified' }}
+                        </div>
+                        {% if recruiter.website_url %}
+                            <div class="company-meta-item">
+                                <i class="fas fa-globe"></i>
+                                <a href="{{ recruiter.website_url }}" target="_blank" style="color: #60a5fa; text-decoration: none;">
+                                    Website
+                                </a>
+                            </div>
+                        {% endif %}
+                        <div class="company-meta-item">
+                            <i class="fas fa-briefcase"></i>
+                            {{ recruiter.jobs|selectattr('is_approved', 'equalto', True)|list|length }} Active Jobs
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Review Statistics -->
+        {% if stats and stats.total_reviews > 0 %}
+            <div class="review-stats">
+                <div class="stats-header">
+                    <h2 class="stats-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Review Statistics
+                    </h2>
+                    <div class="overall-rating">
+                        <div class="rating-number">{{ stats.average_rating }}</div>
+                        <div class="rating-details">
+                            <div class="rating-stars">
+                                {% for i in range(1, 6) %}
+                                    {% if i <= stats.average_rating %}
+                                        ★
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="rating-count">{{ stats.total_reviews }} review{{ 's' if stats.total_reviews != 1 else '' }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-number-alt stat-positive">{{ stats.positive_reviews }}</span>
+                        <div class="stat-label">Positive Reviews</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number-alt stat-neutral">{{ stats.neutral_reviews }}</span>
+                        <div class="stat-label">Neutral Reviews</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number-alt stat-negative">{{ stats.negative_reviews }}</span>
+                        <div class="stat-label">Negative Reviews</div>
+                    </div>
+                    <div class="rating-distribution">
+                        <div class="distribution-title">Rating Distribution</div>
+                        {% for rating in range(5, 0, -1) %}
+                            <div class="rating-bar">
+                                <div class="rating-label">{{ rating }} ★</div>
+                                <div class="rating-progress">
+                                    <div class="rating-progress-fill" 
+                                         style="width: {{ (stats.rating_distribution[rating] / stats.total_reviews * 100) if stats.total_reviews > 0 else 0 }}%"></div>
+                                </div>
+                                <div class="rating-count-small">{{ stats.rating_distribution[rating] }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Review Filters -->
+        <div class="review-filters">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="ratingFilter">Filter by Rating</label>
+                    <select id="ratingFilter" class="filter-control">
+                        <option value="">All Ratings</option>
+                        <option value="5" {{ 'selected' if rating_filter == 5 }}>5 Stars</option>
+                        <option value="4" {{ 'selected' if rating_filter == 4 }}>4 Stars</option>
+                        <option value="3" {{ 'selected' if rating_filter == 3 }}>3 Stars</option>
+                        <option value="2" {{ 'selected' if rating_filter == 2 }}>2 Stars</option>
+                        <option value="1" {{ 'selected' if rating_filter == 1 }}>1 Star</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="dateRangeFilter">Filter by Date</label>
+                    <select id="dateRangeFilter" class="filter-control">
+                        <option value="">All Time</option>
+                        <option value="week" {{ 'selected' if date_range_filter == 'week' }}>Last Week</option>
+                        <option value="month" {{ 'selected' if date_range_filter == 'month' }}>Last Month</option>
+                        <option value="3months" {{ 'selected' if date_range_filter == '3months' }}>Last 3 Months</option>
+                        <option value="year" {{ 'selected' if date_range_filter == 'year' }}>Last Year</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <button type="button" class="clear-filters-btn" onclick="clearReviewFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reviews List -->
+        {% if reviews %}
+            <div class="reviews-list">
+                {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    {{ review.candidate.first_name[0] }}{{ review.candidate.last_name[0] }}
+                                </div>
+                                <div class="reviewer-details">
+                                    <h4>{{ review.candidate.first_name }} {{ review.candidate.last_name }}</h4>
+                                    <div class="review-date">
+                                        {{ review.review_date.strftime('%B %d, %Y') }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="review-rating">
+                                <div class="review-stars">
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= review.rating %}
+                                            ★
+                                        {% else %}
+                                            ☆
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="rating-value">{{ review.rating }}/5</span>
+                            </div>
+                        </div>
+                        
+                        <div class="review-body">
+                            <div class="review-text">{{ review.review_text }}</div>
+                            
+                            <div class="review-footer">
+                                <div class="sentiment-indicator sentiment-{{ get_sentiment_label(review.sentiment_score) }}">
+                                    <i class="fas fa-{{ 'smile' if review.sentiment_score >= 0.05 else 'frown' if review.sentiment_score <= -0.05 else 'meh' }}"></i>
+                                    {{ get_sentiment_label(review.sentiment_score).title() }} Sentiment
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if pagination.pages > 1 %}
+                <div class="pagination">
+                    {% if pagination.has_prev %}
+                        <a href="{{ url_for('recruiter.reviews', recruiter_id=recruiter.recruiter_id, page=pagination.prev_num, rating=rating_filter, date_range=date_range_filter) }}" 
+                           class="pagination-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    {% endif %}
+                    
+                    {% for page_num in pagination.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != pagination.page %}
+                                <a href="{{ url_for('recruiter.reviews', recruiter_id=recruiter.recruiter_id, page=page_num, rating=rating_filter, date_range=date_range_filter) }}" 
+                                   class="pagination-btn">{{ page_num }}</a>
+                            {% else %}
+                                <span class="pagination-btn active">{{ page_num }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="pagination-btn">…</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                        <a href="{{ url_for('recruiter.reviews', recruiter_id=recruiter.recruiter_id, page=pagination.next_num, rating=rating_filter, date_range=date_range_filter) }}" 
+                           class="pagination-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3>No Reviews Found</h3>
+                <p>
+                    {% if rating_filter or date_range_filter %}
+                        No reviews match your current filter criteria. Try adjusting your filters or clearing them to see all reviews.
+                    {% else %}
+                        Your company hasn't received any reviews yet. Encourage candidates who have worked with you to share their experiences.
+                    {% endif %}
+                </p>
+                {% if rating_filter or date_range_filter %}
+                    <button class="btn btn-primary" onclick="clearReviewFilters()">
+                        <i class="fas fa-redo"></i> Clear Filters
+                    </button>
+                {% else %}
+                    <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initReviewFilters();
+});
+
+// Initialize review filters
+function initReviewFilters() {
+    const ratingFilter = document.getElementById('ratingFilter');
+    const dateRangeFilter = document.getElementById('dateRangeFilter');
+    
+    if (ratingFilter) {
+        ratingFilter.addEventListener('change', applyReviewFilters);
+    }
+    
+    if (dateRangeFilter) {
+        dateRangeFilter.addEventListener('change', applyReviewFilters);
+    }
+}
+
+// Apply review filters
+function applyReviewFilters() {
+    const ratingFilter = document.getElementById('ratingFilter');
+    const dateRangeFilter = document.getElementById('dateRangeFilter');
+    
+    const params = new URLSearchParams(window.location.search);
+    
+    // Update or remove rating parameter
+    if (ratingFilter && ratingFilter.value) {
+        params.set('rating', ratingFilter.value);
+    } else {
+        params.delete('rating');
+    }
+    
+    // Update or remove date_range parameter
+    if (dateRangeFilter && dateRangeFilter.value) {
+        params.set('date_range', dateRangeFilter.value);
+    } else {
+        params.delete('date_range');
+    }
+    
+    // Reset to page 1 when applying filters
+    params.delete('page');
+    
+    // Construct new URL
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    
+    // Navigate to new URL
+    window.location.href = newUrl;
+}
+
+// Clear review filters
+function clearReviewFilters() {
+    const ratingFilter = document.getElementById('ratingFilter');
+    const dateRangeFilter = document.getElementById('dateRangeFilter');
+    
+    if (ratingFilter) ratingFilter.value = '';
+    if (dateRangeFilter) dateRangeFilter.value = '';
+    
+    // Navigate to URL without filter parameters
+    const baseUrl = window.location.pathname;
+    window.location.href = baseUrl;
+}
+</script>
+{% endblock %}

@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from models import db, User, Recruiter, Job, Application, Candidate
+from models import db, User, Recruiter, Job, Application, Candidate, CompanyReview
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Create Blueprint
 recruiter = Blueprint('recruiter', __name__, url_prefix='/recruiter')
@@ -21,6 +21,15 @@ def recruiter_login_required(f):
         return f(*args, **kwargs)
     decorated_function.__name__ = f.__name__
     return decorated_function
+
+def get_sentiment_label(score):
+    """Convert sentiment score to human-readable label"""
+    if score >= 0.05:
+        return 'positive'
+    elif score <= -0.05:
+        return 'negative'
+    else:
+        return 'neutral'
 
 @recruiter.route('/register', methods=['GET', 'POST'])
 def register():
@@ -144,10 +153,185 @@ def profile():
     recruiter = Recruiter.query.get(recruiter_id)
     return render_template('recruiter/profile.html', recruiter=recruiter)
 
+@recruiter.route('/profile/edit', methods=['GET', 'POST'])
+@recruiter_login_required
+def edit_profile():
+    """Edit recruiter profile route"""
+    recruiter_id = session.get('recruiter_id')
+    recruiter = Recruiter.query.get(recruiter_id)
+    
+    if not recruiter:
+        flash('Profile not found. Please contact support.', 'error')
+        return redirect(url_for('recruiter.dashboard'))
+    
+    errors = {}
+    
+    if request.method == 'POST':
+        # Get form data
+        company_name = request.form.get('company_name', '').strip()
+        company_description = request.form.get('company_description', '').strip()
+        company_location = request.form.get('company_location', '').strip()
+        contact_person = request.form.get('contact_person', '').strip()
+        website_url = request.form.get('website_url', '').strip()
+        
+        # Validate form data
+        if not company_name:
+            errors['company_name'] = "Company name is required."
+        elif len(company_name) > 100:
+            errors['company_name'] = "Company name must be less than 100 characters."
+        
+        if company_description and len(company_description) > 1000:
+            errors['company_description'] = "Company description must be less than 1000 characters."
+        
+        if not company_location:
+            errors['company_location'] = "Company location is required."
+        elif len(company_location) > 100:
+            errors['company_location'] = "Company location must be less than 100 characters."
+        
+        if not contact_person:
+            errors['contact_person'] = "Contact person is required."
+        elif len(contact_person) > 100:
+            errors['contact_person'] = "Contact person name must be less than 100 characters."
+        
+        if website_url:
+            if len(website_url) > 255:
+                errors['website_url'] = "Website URL must be less than 255 characters."
+            elif not re.match(r'^https?://', website_url):
+                errors['website_url'] = "Website URL must start with http:// or https://"
+        
+        # If no errors, update the profile
+        if not errors:
+            try:
+                recruiter.company_name = company_name
+                recruiter.company_description = company_description if company_description else None
+                recruiter.company_location = company_location
+                recruiter.contact_person = contact_person
+                recruiter.website_url = website_url if website_url else None
+                
+                db.session.commit()
+                
+                # Update session name if changed
+                session['user_name'] = contact_person or company_name
+                session['company_name'] = company_name
+                
+                flash('Company profile updated successfully!', 'success')
+                return redirect(url_for('recruiter.profile'))
+                
+            except Exception as e:
+                db.session.rollback()
+                print(f"Profile update error: {str(e)}")
+                flash('An error occurred while updating your profile. Please try again.', 'error')
+    
+    return render_template('recruiter/edit_profile.html', recruiter=recruiter, errors=errors)
+
+@recruiter.route('/reviews/<int:recruiter_id>')
+@recruiter_login_required
+def reviews(recruiter_id):
+    """Display company-specific reviews for recruiters"""
+    
+    # Verify that the recruiter can only access their own reviews
+    current_recruiter_id = session.get('recruiter_id')
+    if current_recruiter_id != recruiter_id:
+        flash('You can only view reviews for your own company.', 'error')
+        return redirect(url_for('recruiter.profile'))
+    
+    page = request.args.get('page', 1, type=int)
+    rating_filter = request.args.get('rating', type=int)
+    date_range_filter = request.args.get('date_range', '')
+    per_page = 10  # Limit to 10 reviews per page
+    
+    try:
+        # Get the recruiter
+        recruiter = Recruiter.query.get_or_404(recruiter_id)
+        
+        # Build query with filters for this specific company
+        reviews_query = CompanyReview.query.filter_by(recruiter_id=recruiter_id)
+        
+        # Apply rating filter
+        if rating_filter:
+            reviews_query = reviews_query.filter(CompanyReview.rating == rating_filter)
+        
+        # Apply date range filter
+        if date_range_filter:
+            now = datetime.utcnow()
+            if date_range_filter == 'week':
+                start_date = now - timedelta(days=7)
+            elif date_range_filter == 'month':
+                start_date = now - timedelta(days=30)
+            elif date_range_filter == '3months':
+                start_date = now - timedelta(days=90)
+            elif date_range_filter == 'year':
+                start_date = now - timedelta(days=365)
+            else:
+                start_date = None
+            
+            if start_date:
+                reviews_query = reviews_query.filter(CompanyReview.review_date >= start_date)
+        
+        # Order by most recent first and paginate
+        reviews_query = reviews_query.order_by(CompanyReview.review_date.desc())
+        
+        reviews_pagination = reviews_query.paginate(
+            page=page, 
+            per_page=per_page, 
+            error_out=False
+        )
+        
+        reviews = reviews_pagination.items
+        
+        # Calculate statistics for this specific company
+        all_reviews = CompanyReview.query.filter_by(recruiter_id=recruiter_id).all()
+        
+        if all_reviews:
+            total_reviews = len(all_reviews)
+            average_rating = sum(review.rating for review in all_reviews) / total_reviews
+            
+            # Sentiment distribution using VADER thresholds
+            positive_reviews = len([r for r in all_reviews if r.sentiment_score >= 0.05])
+            negative_reviews = len([r for r in all_reviews if r.sentiment_score <= -0.05])
+            neutral_reviews = total_reviews - positive_reviews - negative_reviews
+            
+            # Rating distribution
+            rating_distribution = {}
+            for i in range(1, 6):
+                rating_distribution[i] = len([r for r in all_reviews if r.rating == i])
+            
+            stats = {
+                'total_reviews': total_reviews,
+                'average_rating': round(average_rating, 1),
+                'positive_reviews': positive_reviews,
+                'negative_reviews': negative_reviews,
+                'neutral_reviews': neutral_reviews,
+                'rating_distribution': rating_distribution
+            }
+        else:
+            stats = {
+                'total_reviews': 0,
+                'average_rating': 0,
+                'positive_reviews': 0,
+                'negative_reviews': 0,
+                'neutral_reviews': 0,
+                'rating_distribution': {i: 0 for i in range(1, 6)}
+            }
+        
+        return render_template('recruiter/reviews.html',
+                             recruiter=recruiter,
+                             reviews=reviews,
+                             pagination=reviews_pagination,
+                             stats=stats,
+                             rating_filter=rating_filter,
+                             date_range_filter=date_range_filter,
+                             get_sentiment_label=get_sentiment_label)
+    
+    except Exception as e:
+        print(f"Error loading company reviews: {str(e)}")
+        flash('Unable to load reviews at this time.', 'error')
+        return redirect(url_for('recruiter.profile'))
+
 @recruiter.route('/jobs')
 @recruiter_login_required
 def jobs():
-    """Recruiter jobs management route"""
+    """Job management route"""
     recruiter_id = session.get('recruiter_id')
     try:
         jobs = Job.query.filter_by(recruiter_id=recruiter_id)\

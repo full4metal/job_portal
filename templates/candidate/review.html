@@ -47,6 +47,10 @@
         border-bottom: 2px solid transparent;
         transition: all 0.3s ease;
         font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .review-tab.active {
@@ -56,6 +60,7 @@
     
     .review-tab:hover {
         color: #60a5fa;
+        text-decoration: none;
     }
     
     .tab-content {
@@ -64,6 +69,78 @@
     
     .tab-content.active {
         display: block;
+    }
+    
+    /* Review Filters */
+    .review-filters {
+        background-color: #1a1a1a;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        border: 1px solid #333333;
+    }
+    
+    .filters-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-group label {
+        font-weight: 500;
+        color: #cccccc;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .filter-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #2a2a2a;
+        color: #e5e5e5;
+    }
+    
+    .filter-control:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    select.filter-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b3b3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        padding-right: 2.5rem;
+    }
+    
+    .clear-filters-btn {
+        background: none;
+        border: 1px solid #404040;
+        color: #b3b3b3;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .clear-filters-btn:hover {
+        border-color: #60a5fa;
+        color: #60a5fa;
+        background-color: #2a2a2a;
     }
     
     /* Review Form Styles */
@@ -368,81 +445,15 @@
         align-items: center;
     }
     
-    /* Company List */
-    .companies-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-    
-    .company-card {
-        background-color: #1a1a1a;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        border: 1px solid #333333;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .company-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        border-color: #404040;
-    }
-    
-    .company-card-header {
-        padding: 1.5rem;
-        border-bottom: 1px solid #333333;
-    }
-    
-    .company-name {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #e5e5e5;
-        margin-bottom: 0.5rem;
-    }
-    
-    .company-description {
-        color: #b3b3b3;
-        font-size: 0.9rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .company-card-body {
-        padding: 1.5rem;
-    }
-    
-    .company-rating {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .company-stats-mini {
-        color: #999999;
-        font-size: 0.9rem;
-        margin-bottom: 1rem;
-    }
-    
-    .company-actions {
-        display: flex;
-        gap: 1rem;
-    }
-    
-    .btn-outline {
-        background: none;
-        border: 1px solid #60a5fa;
+    .review-company {
+        background-color: rgba(96, 165, 250, 0.15);
         color: #60a5fa;
-    }
-    
-    .btn-outline:hover {
-        background-color: #60a5fa;
-        color: #ffffff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        display: inline-block;
     }
     
     /* Pagination */
@@ -550,16 +561,13 @@
         
         .review-header,
         .review-form-card,
-        .company-stats {
+        .company-stats,
+        .review-filters {
             padding: 1.5rem;
         }
         
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .companies-grid {
-            grid-template-columns: 1fr;
         }
         
         .review-tabs {
@@ -573,6 +581,11 @@
         .star-rating label {
             font-size: 1.5rem;
         }
+        
+        .filters-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
     }
     
     @media (max-width: 480px) {
@@ -584,10 +597,6 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 1rem;
-        }
-        
-        .company-actions {
-            flex-direction: column;
         }
     }
 </style>
@@ -619,21 +628,25 @@
         
         <!-- Tab Navigation -->
         <div class="review-tabs">
-            <button class="review-tab active" onclick="showTab('submit-review')">
+            <a href="{{ url_for('sentiment.submit_review') }}" 
+               class="review-tab {{ 'active' if not show_all_reviews and not recruiter }}">
                 <i class="fas fa-edit"></i> Submit Review
-            </button>
-            <button class="review-tab" onclick="showTab('browse-companies')">
-                <i class="fas fa-building"></i> Browse Companies
-            </button>
-            {% if recruiter %}
-                <button class="review-tab" onclick="showTab('company-reviews')">
-                    <i class="fas fa-comments"></i> {{ recruiter.company_name }} Reviews
-                </button>
-            {% endif %}
+            </a>
+            <a href="{{ url_for('sentiment.view_reviews') }}" 
+               class="review-tab {{ 'active' if show_all_reviews or recruiter }}">
+                <i class="fas fa-comments"></i> 
+                {% if show_all_reviews %}
+                    All Company Reviews
+                {% elif recruiter %}
+                    {{ recruiter.company_name }} Reviews
+                {% else %}
+                    Company Reviews
+                {% endif %}
+            </a>
         </div>
         
         <!-- Submit Review Tab -->
-        <div id="submit-review" class="tab-content active">
+        <div id="submit-review" class="tab-content {{ 'active' if not show_all_reviews and not recruiter }}">
             <div class="review-form-card">
                 <h3 style="color: #e5e5e5; margin-bottom: 1.5rem;">
                     <i class="fas fa-star"></i> Submit a Company Review
@@ -733,207 +746,227 @@
             </div>
         </div>
         
-        <!-- Browse Companies Tab -->
-        <div id="browse-companies" class="tab-content">
-            {% if company_stats %}
-                <div class="companies-grid">
-                    {% for company_stat in company_stats %}
-                        <div class="company-card">
-                            <div class="company-card-header">
-                                <h3 class="company-name">{{ company_stat.company.company_name }}</h3>
-                                {% if company_stat.company.company_description %}
-                                    <p class="company-description">{{ company_stat.company.company_description }}</p>
+        <!-- Company Reviews Tab -->
+        <div id="company-reviews" class="tab-content {{ 'active' if show_all_reviews or recruiter }}">
+            <!-- Review Filters -->
+            <div class="review-filters">
+                <div class="filters-row">
+                    {% if show_all_reviews %}
+                        <div class="filter-group">
+                            <label for="companyFilter">Filter by Company</label>
+                            <select id="companyFilter" class="filter-control">
+                                <option value="">All Companies</option>
+                                {% if companies %}
+                                    {% for company in companies %}
+                                        <option value="{{ company.recruiter_id }}" 
+                                                {{ 'selected' if company_filter == company.recruiter_id|string }}>
+                                            {{ company.company_name }}
+                                        </option>
+                                    {% endfor %}
                                 {% endif %}
-                            </div>
-                            
-                            <div class="company-card-body">
-                                <div class="company-rating">
-                                    {% if company_stat.average_rating > 0 %}
-                                        <div class="rating-display">
-                                            <span class="rating-number">{{ company_stat.average_rating }}</span>
-                                            <div class="rating-stars">
-                                                {% for i in range(1, 6) %}
-                                                    {% if i <= company_stat.average_rating %}
-                                                        ★
-                                                    {% else %}
-                                                        ☆
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    {% else %}
-                                        <span style="color: #999999;">No ratings yet</span>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="company-stats-mini">
-                                    <i class="fas fa-comments"></i>
-                                    {{ company_stat.total_reviews }} review{{ 's' if company_stat.total_reviews != 1 else '' }}
-                                </div>
-                                
-                                <div class="company-actions">
-                                    <a href="{{ url_for('sentiment.view_reviews', recruiter_id=company_stat.company.recruiter_id) }}" 
-                                       class="btn btn-outline">
-                                        <i class="fas fa-eye"></i> View Reviews
-                                    </a>
-                                    <button class="btn btn-primary" 
-                                            onclick="selectCompanyForReview({{ company_stat.company.recruiter_id }}, '{{ company_stat.company.company_name }}')">
-                                        <i class="fas fa-star"></i> Write Review
-                                    </button>
-                                </div>
-                            </div>
+                            </select>
                         </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-building"></i>
+                    {% endif %}
+                    
+                    <div class="filter-group">
+                        <label for="ratingFilter">Filter by Rating</label>
+                        <select id="ratingFilter" class="filter-control">
+                            <option value="">All Ratings</option>
+                            <option value="5" {{ 'selected' if rating_filter == 5 }}>5 Stars</option>
+                            <option value="4" {{ 'selected' if rating_filter == 4 }}>4 Stars</option>
+                            <option value="3" {{ 'selected' if rating_filter == 3 }}>3 Stars</option>
+                            <option value="2" {{ 'selected' if rating_filter == 2 }}>2 Stars</option>
+                            <option value="1" {{ 'selected' if rating_filter == 1 }}>1 Star</option>
+                        </select>
                     </div>
-                    <h3>No Companies Available</h3>
-                    <p>There are currently no companies to review. Check back later.</p>
+                    
+                    <div class="filter-group">
+                        <label for="dateRangeFilter">Filter by Date</label>
+                        <select id="dateRangeFilter" class="filter-control">
+                            <option value="">All Time</option>
+                            <option value="week" {{ 'selected' if date_range_filter == 'week' }}>Last Week</option>
+                            <option value="month" {{ 'selected' if date_range_filter == 'month' }}>Last Month</option>
+                            <option value="3months" {{ 'selected' if date_range_filter == '3months' }}>Last 3 Months</option>
+                            <option value="year" {{ 'selected' if date_range_filter == 'year' }}>Last Year</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <button type="button" class="clear-filters-btn" onclick="clearReviewFilters()">
+                            <i class="fas fa-times"></i>
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Company Statistics -->
+            {% if stats %}
+                <div class="company-stats">
+                    <h3 style="color: #e5e5e5; margin-bottom: 1.5rem;">
+                        <i class="fas fa-chart-bar"></i> 
+                        {% if show_all_reviews %}
+                            All Companies - Review Statistics
+                        {% elif recruiter %}
+                            {{ recruiter.company_name }} - Review Statistics
+                        {% else %}
+                            Review Statistics
+                        {% endif %}
+                    </h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number-alt">{{ stats.total_reviews }}</span>
+                            <div class="stat-label">Total Reviews</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="rating-display">
+                                <span class="rating-number">{{ stats.average_rating }}</span>
+                                <div class="rating-stars">
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= stats.average_rating %}
+                                            ★
+                                        {% else %}
+                                            ☆
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="stat-label">Average Rating</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number-alt" style="color: #4ade80;">{{ stats.positive_reviews }}</span>
+                            <div class="stat-label">Positive Reviews</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number-alt" style="color: #f87171;">{{ stats.negative_reviews }}</span>
+                            <div class="stat-label">Negative Reviews</div>
+                        </div>
+                       <!-- {% if show_all_reviews and stats.total_companies %}
+                              <div class="stat-card">
+                                <span class="stat-number-alt" style="color: #60a5fa;">{{ stats.total_companies }}</span>
+                                <div class="stat-label">Companies Reviewed</div>
+                            </div>
+                        {% endif %}-->
+                    </div>
                 </div>
             {% endif %}
-        </div>
-        
-        <!-- Company Reviews Tab -->
-        {% if recruiter %}
-            <div id="company-reviews" class="tab-content">
-                <!-- Company Statistics -->
-                {% if stats %}
-                    <div class="company-stats">
-                        <h3 style="color: #e5e5e5; margin-bottom: 1.5rem;">
-                            <i class="fas fa-chart-bar"></i> {{ recruiter.company_name }} - Review Statistics
-                        </h3>
-                        
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <span class="stat-number-alt">{{ stats.total_reviews }}</span>
-                                <div class="stat-label">Total Reviews</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="rating-display">
-                                    <span class="rating-number">{{ stats.average_rating }}</span>
-                                    
-                                    <div class="rating-stars">
+            
+            <!-- Reviews List -->
+            {% if reviews %}
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                        <div class="review-card">
+                            <div class="review-header-card">
+                                <div class="review-meta">
+                                    <div class="reviewer-info">
+                                        <div class="reviewer-avatar">
+                                            {{ review.candidate.first_name[0] }}{{ review.candidate.last_name[0] }}
+                                        </div>
+                                        <div>
+                                            <div class="reviewer-name">
+                                                {{ review.candidate.first_name }} {{ review.candidate.last_name }}
+                                            </div>
+                                            <div class="review-date">
+                                                {{ review.review_date.strftime('%B %d, %Y') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="review-rating">
+                                    <div class="review-stars">
                                         {% for i in range(1, 6) %}
-                                            {% if i <= stats.average_rating %}
+                                            {% if i <= review.rating %}
                                                 ★
                                             {% else %}
                                                 ☆
                                             {% endif %}
                                         {% endfor %}
                                     </div>
-                                </div>
-                                <div class="stat-label">Average Rating</div>
-                            </div>
-                            <div class="stat-card">
-                                <span class="stat-number-alt" style="color: #4ade80;">{{ stats.positive_reviews }}</span>
-                                <div class="stat-label">Positive Reviews</div>
-                            </div>
-                            <div class="stat-card">
-                                <span class="stat-number-alt" style="color: #f87171;">{{ stats.negative_reviews }}</span>
-                                <div class="stat-label">Negative Reviews</div>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-                
-                <!-- Reviews List -->
-                {% if reviews %}
-                    <div class="reviews-list">
-                        {% for review in reviews %}
-                            <div class="review-card">
-                                <div class="review-header-card">
-                                    <div class="review-meta">
-                                        <div class="reviewer-info">
-                                            <div class="reviewer-avatar">
-                                                {{ review.candidate.first_name[0] }}{{ review.candidate.last_name[0] }}
-                                            </div>
-                                            <div>
-                                                <div class="reviewer-name">
-                                                    {{ review.candidate.first_name }} {{ review.candidate.last_name }}
-                                                </div>
-                                                <div class="review-date">
-                                                    {{ review.review_date.strftime('%B %d, %Y') }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="review-rating">
-                                        <div class="review-stars">
-                                            {% for i in range(1, 6) %}
-                                                {% if i <= review.rating %}
-                                                    ★
-                                                {% else %}
-                                                    ☆
-                                                {% endif %}
-                                            {% endfor %}
-                                        </div>
-                                        <span style="color: #e5e5e5; font-weight: 500;">{{ review.rating }}/5</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="review-body">
-                                    <div class="review-text">{{ review.review_text }}</div>
-                                    
-                                    <div class="review-footer">
-                                        <div class="sentiment-indicator sentiment-{{ get_sentiment_label(review.sentiment_score) }}">
-                                            <i class="fas fa-{{ 'smile' if review.sentiment_score > 0.1 else 'frown' if review.sentiment_score < -0.1 else 'meh' }}"></i>
-                                            {{ get_sentiment_label(review.sentiment_score).title() }} Sentiment
-                                        </div>
-                                    </div>
+                                    <span style="color: #e5e5e5; font-weight: 500;">{{ review.rating }}/5</span>
                                 </div>
                             </div>
-                        {% endfor %}
-                    </div>
-                    
-                    <!-- Pagination -->
-                    {% if pagination.pages > 1 %}
-                        <div class="pagination">
-                            {% if pagination.has_prev %}
-                                <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id, page=pagination.prev_num) }}" 
-                                   class="pagination-btn">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            {% endif %}
                             
-                            {% for page_num in pagination.iter_pages() %}
-                                {% if page_num %}
-                                    {% if page_num != pagination.page %}
-                                        <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id, page=page_num) }}" 
-                                           class="pagination-btn">{{ page_num }}</a>
-                                    {% else %}
-                                        <span class="pagination-btn active">{{ page_num }}</span>
-                                    {% endif %}
-                                {% else %}
-                                    <span class="pagination-btn">…</span>
+                            <div class="review-body">
+                                {% if show_all_reviews %}
+                                    <div class="review-company">
+                                        <i class="fas fa-building"></i>
+                                        Review for: {{ review.recruiter.company_name }}
+                                    </div>
                                 {% endif %}
-                            {% endfor %}
-                            
-                            {% if pagination.has_next %}
-                                <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id, page=pagination.next_num) }}" 
-                                   class="pagination-btn">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
+                                
+                                <div class="review-text">{{ review.review_text }}</div>
+                                
+                                <div class="review-footer">
+                                    <div class="sentiment-indicator sentiment-{{ get_sentiment_label(review.sentiment_score) }}">
+                                        <i class="fas fa-{{ 'smile' if review.sentiment_score > 0.1 else 'frown' if review.sentiment_score < -0.1 else 'meh' }}"></i>
+                                        {{ get_sentiment_label(review.sentiment_score).title() }} Sentiment
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if pagination.pages > 1 %}
+                    <div class="pagination">
+                        {% if pagination.has_prev %}
+                            <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id if recruiter else none, page=pagination.prev_num, rating=rating_filter, date_range=date_range_filter, company=company_filter) }}" 
+                               class="pagination-btn">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        {% endif %}
+                        
+                        {% for page_num in pagination.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != pagination.page %}
+                                    <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id if recruiter else none, page=page_num, rating=rating_filter, date_range=date_range_filter, company=company_filter) }}" 
+                                       class="pagination-btn">{{ page_num }}</a>
+                                {% else %}
+                                    <span class="pagination-btn active">{{ page_num }}</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="pagination-btn">…</span>
                             {% endif %}
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <i class="fas fa-comments"></i>
-                        </div>
-                        <h3>No Reviews Yet</h3>
-                        <p>{{ recruiter.company_name }} hasn't received any reviews yet. Be the first to share your experience!</p>
-                        <button class="btn btn-primary" onclick="showTab('submit-review')">
-                            <i class="fas fa-star"></i> Write First Review
-                        </button>
+                        {% endfor %}
+                        
+                        {% if pagination.has_next %}
+                            <a href="{{ url_for('sentiment.view_reviews', recruiter_id=recruiter.recruiter_id if recruiter else none, page=pagination.next_num, rating=rating_filter, date_range=date_range_filter, company=company_filter) }}" 
+                               class="pagination-btn">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        {% endif %}
                     </div>
                 {% endif %}
-            </div>
-        {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>No Reviews Found</h3>
+                    <p>
+                        {% if rating_filter or date_range_filter or company_filter %}
+                            No reviews match your current filter criteria. Try adjusting your filters or clearing them to see all reviews.
+                        {% elif recruiter %}
+                            {{ recruiter.company_name }} hasn't received any reviews yet. Be the first to share your experience!
+                        {% else %}
+                            No company reviews have been submitted yet. Be the first to share your experience!
+                        {% endif %}
+                    </p>
+                    {% if rating_filter or date_range_filter or company_filter %}
+                        <button class="btn btn-primary" onclick="clearReviewFilters()">
+                            <i class="fas fa-redo"></i> Clear Filters
+                        </button>
+                    {% else %}
+                        <a href="{{ url_for('sentiment.submit_review') }}" class="btn btn-primary">
+                            <i class="fas fa-star"></i> Write First Review
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
     </div>
 </section>
 {% endblock %}
@@ -944,30 +977,80 @@ document.addEventListener('DOMContentLoaded', function() {
     initCharacterCount();
     initSentimentAnalysis();
     initFormValidation();
+    initReviewFilters();
 });
 
-// Tab functionality
-function showTab(tabName) {
-    // Hide all tab contents
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabContents.forEach(content => {
-        content.classList.remove('active');
-    });
+// Initialize review filters
+function initReviewFilters() {
+    const companyFilter = document.getElementById('companyFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const dateRangeFilter = document.getElementById('dateRangeFilter');
     
-    // Remove active class from all tabs
-    const tabs = document.querySelectorAll('.review-tab');
-    tabs.forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    // Show selected tab content
-    const selectedContent = document.getElementById(tabName);
-    if (selectedContent) {
-        selectedContent.classList.add('active');
+    if (companyFilter) {
+        companyFilter.addEventListener('change', applyReviewFilters);
     }
     
-    // Add active class to clicked tab
-    event.target.classList.add('active');
+    if (ratingFilter) {
+        ratingFilter.addEventListener('change', applyReviewFilters);
+    }
+    
+    if (dateRangeFilter) {
+        dateRangeFilter.addEventListener('change', applyReviewFilters);
+    }
+}
+
+// Apply review filters
+function applyReviewFilters() {
+    const companyFilter = document.getElementById('companyFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const dateRangeFilter = document.getElementById('dateRangeFilter');
+    
+    const params = new URLSearchParams(window.location.search);
+    
+    // Update or remove company parameter (now using recruiter_id)
+    if (companyFilter && companyFilter.value) {
+        params.set('company', companyFilter.value);
+    } else {
+        params.delete('company');
+    }
+    
+    // Update or remove rating parameter
+    if (ratingFilter && ratingFilter.value) {
+        params.set('rating', ratingFilter.value);
+    } else {
+        params.delete('rating');
+    }
+    
+    // Update or remove date_range parameter
+    if (dateRangeFilter && dateRangeFilter.value) {
+        params.set('date_range', dateRangeFilter.value);
+    } else {
+        params.delete('date_range');
+    }
+    
+    // Reset to page 1 when applying filters
+    params.delete('page');
+    
+    // Construct new URL
+    const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    
+    // Navigate to new URL
+    window.location.href = newUrl;
+}
+
+// Clear review filters
+function clearReviewFilters() {
+    const companyFilter = document.getElementById('companyFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const dateRangeFilter = document.getElementById('dateRangeFilter');
+    
+    if (companyFilter) companyFilter.value = '';
+    if (ratingFilter) ratingFilter.value = '';
+    if (dateRangeFilter) dateRangeFilter.value = '';
+    
+    // Navigate to URL without filter parameters
+    const baseUrl = window.location.pathname;
+    window.location.href = baseUrl;
 }
 
 // Character count functionality
@@ -1142,24 +1225,6 @@ function showFieldError(field, message) {
     errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
     
     field.parentNode.appendChild(errorDiv);
-}
-
-// Select company for review
-function selectCompanyForReview(recruiterId, companyName) {
-    // Switch to submit review tab
-    showTab('submit-review');
-    
-    // Select the company in the dropdown
-    const recruiterSelect = document.getElementById('recruiter_id');
-    if (recruiterSelect) {
-        recruiterSelect.value = recruiterId;
-    }
-    
-    // Scroll to form
-    document.getElementById('submit-review').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-    });
 }
 
 // Clear form errors on input

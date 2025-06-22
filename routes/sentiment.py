@@ -1,57 +1,51 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import db, CompanyReview, Recruiter, Candidate
 from werkzeug.security import generate_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import uuid
 
-# Import sentiment analysis libraries
+# Import NLTK VADER sentiment analyzer
 try:
-    from textblob import TextBlob
+    import nltk
+    from nltk.sentiment import SentimentIntensityAnalyzer
+    # Download required NLTK data if not present
+    try:
+        nltk.data.find('vader_lexicon')
+    except LookupError:
+        nltk.download('vader_lexicon')
     SENTIMENT_AVAILABLE = True
 except ImportError:
-    try:
-        import nltk
-        from nltk.sentiment import SentimentIntensityAnalyzer
-        # Download required NLTK data if not present
-        try:
-            nltk.data.find('vader_lexicon')
-        except LookupError:
-            nltk.download('vader_lexicon')
-        SENTIMENT_AVAILABLE = True
-    except ImportError:
-        SENTIMENT_AVAILABLE = False
+    SENTIMENT_AVAILABLE = False
 
 # Create Blueprint
 sentiment = Blueprint('sentiment', __name__, url_prefix='/company')
 
 def analyze_sentiment(text):
     """
-    Analyze sentiment of review text using available libraries
+    Analyze sentiment of review text using NLTK's VADER sentiment analyzer
     Returns sentiment score between -1 (negative) and 1 (positive)
     """
     if not text or not SENTIMENT_AVAILABLE:
         return 0.0
     
     try:
-        # Try TextBlob first (simpler and more reliable)
-        blob = TextBlob(text)
-        polarity = blob.sentiment.polarity
-        return round(polarity, 3)
-    except:
-        try:
-            # Fallback to NLTK VADER
-            sia = SentimentIntensityAnalyzer()
-            scores = sia.polarity_scores(text)
-            # Convert compound score (-1 to 1) to our scale
-            return round(scores['compound'], 3)
-        except:
-            # Manual sentiment analysis as last resort
-            return manual_sentiment_analysis(text)
+        # Use NLTK VADER sentiment analyzer
+        sia = SentimentIntensityAnalyzer()
+        scores = sia.polarity_scores(text)
+        
+        # Return the compound score which ranges from -1 to 1
+        # Compound score is the most useful single measure of sentiment
+        return round(scores['compound'], 3)
+        
+    except Exception as e:
+        print(f"VADER sentiment analysis error: {str(e)}")
+        # Fallback to manual sentiment analysis if VADER fails
+        return manual_sentiment_analysis(text)
 
 def manual_sentiment_analysis(text):
     """
-    Simple manual sentiment analysis using keyword matching
+    Simple manual sentiment analysis using keyword matching as fallback
     Returns sentiment score between -1 and 1
     """
     if not text:
@@ -64,7 +58,8 @@ def manual_sentiment_analysis(text):
         'excellent', 'amazing', 'great', 'good', 'fantastic', 'wonderful', 
         'outstanding', 'perfect', 'love', 'best', 'awesome', 'brilliant',
         'satisfied', 'happy', 'pleased', 'recommend', 'professional',
-        'helpful', 'friendly', 'efficient', 'quality', 'impressive'
+        'helpful', 'friendly', 'efficient', 'quality', 'impressive',
+        'superb', 'exceptional', 'remarkable', 'terrific', 'marvelous'
     ]
     
     # Negative keywords
@@ -72,7 +67,8 @@ def manual_sentiment_analysis(text):
         'terrible', 'awful', 'bad', 'horrible', 'worst', 'hate', 'disappointing',
         'poor', 'unprofessional', 'rude', 'slow', 'inefficient', 'useless',
         'frustrated', 'angry', 'dissatisfied', 'complaint', 'problem',
-        'issue', 'difficult', 'unresponsive', 'unreliable'
+        'issue', 'difficult', 'unresponsive', 'unreliable', 'pathetic',
+        'disgusting', 'appalling', 'dreadful', 'atrocious', 'abysmal'
     ]
     
     positive_count = sum(1 for word in positive_words if word in text)
@@ -87,13 +83,53 @@ def manual_sentiment_analysis(text):
     return max(-1.0, min(1.0, sentiment_score))
 
 def get_sentiment_label(score):
-    """Convert sentiment score to human-readable label"""
-    if score > 0.1:
+    """
+    Convert VADER compound score to human-readable label
+    Using standard VADER thresholds:
+    - Positive: compound score >= 0.05
+    - Negative: compound score <= -0.05
+    - Neutral: -0.05 < compound score < 0.05
+    """
+    if score >= 0.05:
         return 'positive'
-    elif score < -0.1:
+    elif score <= -0.05:
         return 'negative'
     else:
         return 'neutral'
+
+def get_detailed_sentiment_scores(text):
+    """
+    Get detailed sentiment scores from VADER including positive, negative, neutral, and compound
+    Returns dictionary with all VADER scores
+    """
+    if not text or not SENTIMENT_AVAILABLE:
+        return {
+            'positive': 0.0,
+            'negative': 0.0,
+            'neutral': 1.0,
+            'compound': 0.0
+        }
+    
+    try:
+        sia = SentimentIntensityAnalyzer()
+        scores = sia.polarity_scores(text)
+        
+        # Round all scores to 3 decimal places
+        return {
+            'positive': round(scores['pos'], 3),
+            'negative': round(scores['neg'], 3),
+            'neutral': round(scores['neu'], 3),
+            'compound': round(scores['compound'], 3)
+        }
+        
+    except Exception as e:
+        print(f"Detailed VADER sentiment analysis error: {str(e)}")
+        return {
+            'positive': 0.0,
+            'negative': 0.0,
+            'neutral': 1.0,
+            'compound': 0.0
+        }
 
 def candidate_login_required(f):
     """Decorator to require candidate login"""
@@ -165,7 +201,7 @@ def submit_review():
         # If no errors, create the review
         if not errors:
             try:
-                # Analyze sentiment
+                # Analyze sentiment using VADER
                 sentiment_score = analyze_sentiment(review_text)
                 
                 # Create new review
@@ -214,19 +250,46 @@ def submit_review():
 @sentiment.route('/reviews')
 @sentiment.route('/reviews/<int:recruiter_id>')
 def view_reviews(recruiter_id=None):
-    """Display company reviews with pagination and statistics"""
+    """Display company reviews with pagination, filtering, and statistics"""
     
     page = request.args.get('page', 1, type=int)
-    per_page = 20
+    rating_filter = request.args.get('rating', type=int)
+    date_range_filter = request.args.get('date_range', '')
+    company_filter = request.args.get('company', '')  # Now expects recruiter_id
+    per_page = 10  # Limit to 10 reviews per page
     
     try:
         if recruiter_id:
             # Get specific company reviews
             recruiter = Recruiter.query.get_or_404(recruiter_id)
+            show_all_reviews = False
             
-            # Get paginated reviews
-            reviews_query = CompanyReview.query.filter_by(recruiter_id=recruiter_id)\
-                                              .order_by(CompanyReview.review_date.desc())
+            # Build query with filters
+            reviews_query = CompanyReview.query.filter_by(recruiter_id=recruiter_id)
+            
+            # Apply rating filter
+            if rating_filter:
+                reviews_query = reviews_query.filter(CompanyReview.rating == rating_filter)
+            
+            # Apply date range filter
+            if date_range_filter:
+                now = datetime.utcnow()
+                if date_range_filter == 'week':
+                    start_date = now - timedelta(days=7)
+                elif date_range_filter == 'month':
+                    start_date = now - timedelta(days=30)
+                elif date_range_filter == '3months':
+                    start_date = now - timedelta(days=90)
+                elif date_range_filter == 'year':
+                    start_date = now - timedelta(days=365)
+                else:
+                    start_date = None
+                
+                if start_date:
+                    reviews_query = reviews_query.filter(CompanyReview.review_date >= start_date)
+            
+            # Order by most recent first and paginate
+            reviews_query = reviews_query.order_by(CompanyReview.review_date.desc())
             
             reviews_pagination = reviews_query.paginate(
                 page=page, 
@@ -236,16 +299,16 @@ def view_reviews(recruiter_id=None):
             
             reviews = reviews_pagination.items
             
-            # Calculate statistics
+            # Calculate statistics for specific company
             all_reviews = CompanyReview.query.filter_by(recruiter_id=recruiter_id).all()
             
             if all_reviews:
                 total_reviews = len(all_reviews)
                 average_rating = sum(review.rating for review in all_reviews) / total_reviews
                 
-                # Sentiment distribution
-                positive_reviews = len([r for r in all_reviews if r.sentiment_score > 0.1])
-                negative_reviews = len([r for r in all_reviews if r.sentiment_score < -0.1])
+                # Sentiment distribution using VADER thresholds
+                positive_reviews = len([r for r in all_reviews if r.sentiment_score >= 0.05])
+                negative_reviews = len([r for r in all_reviews if r.sentiment_score <= -0.05])
                 neutral_reviews = total_reviews - positive_reviews - negative_reviews
                 
                 # Rating distribution
@@ -270,40 +333,120 @@ def view_reviews(recruiter_id=None):
                     'neutral_reviews': 0,
                     'rating_distribution': {i: 0 for i in range(1, 6)}
                 }
-            
-            return render_template('candidate/review.html',
-                                 recruiter=recruiter,
-                                 reviews=reviews,
-                                 pagination=reviews_pagination,
-                                 stats=stats,
-                                 get_sentiment_label=get_sentiment_label)
-        
+
         else:
-            # Get all companies with their review stats
-            companies = Recruiter.query.all()
-            company_stats = []
+            # Get all reviews from all companies
+            recruiter = None
+            show_all_reviews = True
             
-            for company in companies:
-                company_reviews = CompanyReview.query.filter_by(recruiter_id=company.recruiter_id).all()
-                
-                if company_reviews:
-                    avg_rating = sum(r.rating for r in company_reviews) / len(company_reviews)
-                    total_reviews = len(company_reviews)
+            # Build query with filters
+            reviews_query = CompanyReview.query.join(Recruiter)
+            
+            # Apply company filter (now using recruiter_id)
+            if company_filter:
+                try:
+                    company_recruiter_id = int(company_filter)
+                    reviews_query = reviews_query.filter(CompanyReview.recruiter_id == company_recruiter_id)
+                except ValueError:
+                    # If not a valid integer, ignore the filter
+                    pass
+            
+            # Apply rating filter
+            if rating_filter:
+                reviews_query = reviews_query.filter(CompanyReview.rating == rating_filter)
+            
+            # Apply date range filter
+            if date_range_filter:
+                now = datetime.utcnow()
+                if date_range_filter == 'week':
+                    start_date = now - timedelta(days=7)
+                elif date_range_filter == 'month':
+                    start_date = now - timedelta(days=30)
+                elif date_range_filter == '3months':
+                    start_date = now - timedelta(days=90)
+                elif date_range_filter == 'year':
+                    start_date = now - timedelta(days=365)
                 else:
-                    avg_rating = 0
-                    total_reviews = 0
+                    start_date = None
                 
-                company_stats.append({
-                    'company': company,
-                    'average_rating': round(avg_rating, 1),
-                    'total_reviews': total_reviews
-                })
+                if start_date:
+                    reviews_query = reviews_query.filter(CompanyReview.review_date >= start_date)
             
-            # Sort by average rating (highest first)
-            company_stats.sort(key=lambda x: x['average_rating'], reverse=True)
+            # Order by most recent first and paginate
+            reviews_query = reviews_query.order_by(CompanyReview.review_date.desc())
             
-            return render_template('candidate/review.html',
-                                 company_stats=company_stats)
+            reviews_pagination = reviews_query.paginate(
+                page=page, 
+                per_page=per_page, 
+                error_out=False
+            )
+            
+            reviews = reviews_pagination.items
+            
+            # Calculate statistics for all reviews (or filtered reviews)
+            if company_filter or rating_filter or date_range_filter:
+                # Use filtered results for stats
+                filtered_reviews = reviews_query.all()
+                all_reviews = filtered_reviews
+            else:
+                # Use all reviews for stats
+                all_reviews = CompanyReview.query.all()
+            
+            if all_reviews:
+                total_reviews = len(all_reviews)
+                average_rating = sum(review.rating for review in all_reviews) / total_reviews
+                
+                # Sentiment distribution using VADER thresholds
+                positive_reviews = len([r for r in all_reviews if r.sentiment_score >= 0.05])
+                negative_reviews = len([r for r in all_reviews if r.sentiment_score <= -0.05])
+                neutral_reviews = total_reviews - positive_reviews - negative_reviews
+                
+                # Rating distribution
+                rating_distribution = {}
+                for i in range(1, 6):
+                    rating_distribution[i] = len([r for r in all_reviews if r.rating == i])
+                
+                # Company count
+                total_companies = len(set(review.recruiter_id for review in all_reviews))
+                
+                stats = {
+                    'total_reviews': total_reviews,
+                    'average_rating': round(average_rating, 1),
+                    'positive_reviews': positive_reviews,
+                    'negative_reviews': negative_reviews,
+                    'neutral_reviews': neutral_reviews,
+                    'rating_distribution': rating_distribution,
+                    'total_companies': total_companies
+                }
+            else:
+                stats = {
+                    'total_reviews': 0,
+                    'average_rating': 0,
+                    'positive_reviews': 0,
+                    'negative_reviews': 0,
+                    'neutral_reviews': 0,
+                    'rating_distribution': {i: 0 for i in range(1, 6)},
+                    'total_companies': 0
+                }
+        
+        # Get companies for the review form dropdown and company filter
+        try:
+            companies = Recruiter.query.all()
+        except Exception as e:
+            companies = []
+            print(f"Error fetching companies: {str(e)}")
+        
+        return render_template('candidate/review.html',
+                             recruiter=recruiter,
+                             reviews=reviews,
+                             pagination=reviews_pagination,
+                             stats=stats,
+                             companies=companies,
+                             show_all_reviews=show_all_reviews,
+                             rating_filter=rating_filter,
+                             date_range_filter=date_range_filter,
+                             company_filter=company_filter,
+                             get_sentiment_label=get_sentiment_label)
     
     except Exception as e:
         print(f"Error loading reviews: {str(e)}")
@@ -312,7 +455,7 @@ def view_reviews(recruiter_id=None):
 
 @sentiment.route('/api/sentiment-analysis', methods=['POST'])
 def api_sentiment_analysis():
-    """API endpoint for real-time sentiment analysis"""
+    """API endpoint for real-time sentiment analysis using VADER"""
     try:
         data = request.get_json()
         text = data.get('text', '')
@@ -320,13 +463,16 @@ def api_sentiment_analysis():
         if not text:
             return jsonify({'error': 'No text provided'}), 400
         
-        sentiment_score = analyze_sentiment(text)
+        # Get detailed VADER scores
+        detailed_scores = get_detailed_sentiment_scores(text)
+        sentiment_score = detailed_scores['compound']
         sentiment_label = get_sentiment_label(sentiment_score)
         
         return jsonify({
             'sentiment_score': sentiment_score,
             'sentiment_label': sentiment_label,
-            'text_length': len(text)
+            'text_length': len(text),
+            'detailed_scores': detailed_scores
         })
         
     except Exception as e:
@@ -351,9 +497,9 @@ def api_company_stats(recruiter_id):
         total_reviews = len(reviews)
         average_rating = sum(review.rating for review in reviews) / total_reviews
         
-        # Sentiment distribution
-        positive = len([r for r in reviews if r.sentiment_score > 0.1])
-        negative = len([r for r in reviews if r.sentiment_score < -0.1])
+        # Sentiment distribution using VADER thresholds
+        positive = len([r for r in reviews if r.sentiment_score >= 0.05])
+        negative = len([r for r in reviews if r.sentiment_score <= -0.05])
         neutral = total_reviews - positive - negative
         
         return jsonify({
