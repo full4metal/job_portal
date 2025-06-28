@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "job_portal"
 version = "0.1.0"
-description = "A job portal web application"
+description = "Job Portal built with Flask"
 authors = ["Agney Anand <your-email@example.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -11,7 +12,6 @@ flask_sqlalchemy = "3.1.1"
 flask_wtf = "1.2.2"
 nltk = "3.9.1"
 numpy = "1.24.4"
-
 
 [build-system]
 requires = ["poetry-core"]
