@@ -1,7 +1,17 @@
+[tool.poetry]
+name = "job_portal"
+version = "0.1.0"
+description = "A job portal web application"
+authors = ["Agney Anand <your-email@example.com>"]
+
 [tool.poetry.dependencies]
 python = "^3.13"
 flask = "3.1.1"
 flask_sqlalchemy = "3.1.1"
 flask_wtf = "1.2.2"
 nltk = "3.9.1"
-numpy = "^1.24.4"
+numpy = "1.24.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
