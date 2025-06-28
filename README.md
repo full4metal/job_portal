@@ -1,5 +1,5 @@
 ## 🌟 Inspiration  
-Job seekers often struggle to find roles that truly match their skills, expectations, and preferred locations. Recruiters, on the other hand, need better tools to assess fit beyond just resumes. We wanted to build a portal that intelligently connects the right candidates with the right jobs — using NLP and sentiment analysis to improve transparency and decision-making.
+Job seekers often struggle to find roles that truly match their skills, expectations, and preferred locations. Recruiters, on the other hand, need better tools to assess fit beyond just resumes. I wanted to build a portal that intelligently connects the right candidates with the right jobs — using NLP and sentiment analysis to improve transparency and decision-making.
 
 ---
 
