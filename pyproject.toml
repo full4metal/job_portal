@@ -5,12 +5,13 @@ description = "A job portal web application"
 authors = ["Agney Anand <your-email@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.11"
 flask = "3.1.1"
 flask_sqlalchemy = "3.1.1"
 flask_wtf = "1.2.2"
 nltk = "3.9.1"
 numpy = "1.24.4"
+
 
 [build-system]
 requires = ["poetry-core"]
